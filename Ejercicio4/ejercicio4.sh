@@ -16,14 +16,9 @@ declare -A fileMultiComments
 
 comentario=$COMENTARIO_CERRADO
 
-for fichero in $(ls $1)
-do
 
-        if [ -r $fichero ]
-        then
-                echo "tiene permisos de lectura para este fichero: " $fichero
-
-                while read -r linea
+leerFichero (){
+while read -r linea
                 do
                         (( ficheroLineasTotales[$fichero]++ ))
 
@@ -31,77 +26,55 @@ do
                         posFinalLinea=${#linea}-1
                         finDeLinea=${linea:$posFinalLinea-1:$posFinalLinea}
 
-                        #COMENTARIO SIMPLE
-                        if [[ $comienzoDeLinea == $COMENTARIO_SIMPLE ]]
-                        then
-                                if [[ $comentario == $COMENTARIO_CERRADO ]]
+                        #COMENTARIOS CERRADOS
+
+                         if [[ $comentario == $COMENTARIO_CERRADO ]]
+                         then
+                                if [[ $comienzoDeLinea == $COMENTARIO_SIMPLE ]]
                                 then
                                         (( ficheroComentariosSimples[$fichero]++ ))
-                                fi
-                        fi
-
-                        #COMENTARIO MULTIPLE
-
-                        if [[ $comienzoDeLinea == $COMENTARIO_MULTIPLE ]]
-                        then
-                            echo "comienzo multiple -> " $comienzoDeLinea
-                                if [[ $comentario == $COMENTARIO_CERRADO ]]
-                                then
-                                        comentario=$COMENTARIO_ABIERTO
-                                        (( fileMultiComments[$fichero]++ ))
-                                fi
-                        else
-
-                                if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
-                                then
-                                        if [[ $comentario == $COMENTARIO_ABIERTO ]]
-                                        then
-                                                comentario=$COMENTARIO_CERRADO
-                                                (( fileMultiComments[$fichero]++ ))
-                                        fi
                                 else
-
-                                if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
-                                then
-                                        if [[ $comentario == $COMENTARIO_ABIERTO ]]
+                                        if [[ $comienzoDeLinea == $COMENTARIO_MULTIPLE ]]
                                         then
-                                                comentario=$COMENTARIO_CERRADO
                                                 (( fileMultiComments[$fichero]++ ))
-                                        fi
-                                else
-
-                                        if [[ $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
-                                        then
-                                                if [[ $comentario == $COMENTARIO_ABIERTO ]]
-                                                then
-                                                        comentario=$COMENTARIO_CERRADO
-                                                        (( fileMultiComments[$fichero]++ ))
-                                                fi
-                                        else
-                                                if [[ $comentario == $COMENTARIO_ABIERTO ]]
-                                                then
-                                                        (( fileMultiComments[$fichero]++ ))
-                                                fi
+                                                 comentario=$COMENTARIO_ABIERTO
                                         fi
                                 fi
-                        fi
+                         else   #COMENTARIOS ABIERTOS
+                                (( fileMultiComments[$fichero]++ ))
+                                if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE || $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
+                                then
+                                        comentario=$COMENTARIO_CERRADO
+                                fi
 
-                done < $fichero
+                          fi
 
-        else
-                echo "NO TIENE PERMISOS PARA ESTE FICHERO: " $fichero
-        fi
-done
+                 done < $fichero
 
+
+ }
+
+
+comentarios (){
 echo "COMENTARIOS SIMPLES:"
-
 for i in ${!ficheroComentariosSimples[@]}
 do
-        echo $i ${ficheroComentariosSimples[$i]}
+        echo ${ficheroComentariosSimples[$i]}
 done
-
 echo "COMENTARIOS MULTIPLES:"
 for i in ${!fileMultiComments[@]}
 do
-        echo $i ${fileMultiComments[$i]}
+        echo ${fileMultiComments[$i]}
+done
+}
+for fichero in $(ls $ruta)
+do
+        if [ -r $fichero ]
+        then
+                echo "tiene permisos de lectura para este fichero: " $fichero
+                leerFichero
+                comentarios
+        else
+                echo "NO TIENE PERMISOS PARA ESTE FICHERO: " $fichero
+        fi
 done
