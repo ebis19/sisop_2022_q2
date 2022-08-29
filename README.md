@@ -1,1 +1,0 @@
-trabajos practicos de sistema operativo
