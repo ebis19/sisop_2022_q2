@@ -2,7 +2,7 @@
 
 #-----------------------------------------------#
 # Nombre del Script: contadorcodigo.sh          #
-# APL°1                         ººººººº�#
+# APL 1						#
 # Ejercicio 4					#
 # Integrantes:                                  #
 # Molina Lara			DNI: 40187938   #
@@ -38,12 +38,12 @@ comentariosTotales=0
 
 #funciones
 usage() {
-        echo "AnalisisCodigoFuente\n"
+        echo "contador de codigo"
         echo "Comandos permitidos y obligatorios:"
-        echo "--ruta    Se coloca ruta (path) de los archivos con el c  digo fuente a analizar"
-        echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma\n"
+        echo "--ruta    Se coloca ruta (path) de los archivos con el codigo fuente a analizar"
+        echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma"
         echo "Ejemplo:\n"
-        echo "AnalisisCodigoFuente --ruta home/usuario/proyecto1 --ext js,css,php"
+        echo "./contadorcodigo.sh --ruta home/usuario/proyecto1 --ext js,css,php"
 }
 
 validarInputs() {
