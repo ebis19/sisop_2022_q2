@@ -2,16 +2,17 @@
 
 #-----------------------------------------------#
 # Nombre del Script: contadorcodigo.sh          #
-# APL  1                                        #
-# Ejercicio 4                                   #
+# APL°1                         ººººººº�#
+# Ejercicio 4					#
 # Integrantes:                                  #
-# Molina Lara                   DNI: 40187938   #
-# Lopez Julian                  DNI: 39712927   #
-# Gorbolino Tamara....                          #
-# Elias...                                      #
-# Amelia Colque                 DNI: 34095247   #
-# Entrega                                       #
+# Molina Lara			DNI: 40187938   #
+# Lopez Julian			DNI: 39712927	#
+# Gorbolino Tamara....				#
+# Biscaia Elias			DNI: 40078823	#
+# Amelia Colque			DNI: 34095247	#
+# Entrega                                  	#
 #-----------------------------------------------#
+
 COMENTARIO_SIMPLE="//"
 COMENTARIO_MULTIPLE="/\*"
 FIN_COMENTARIO_MULTIPLE="*/"
@@ -22,7 +23,7 @@ EXT_CORRECTA=1
 EXT_INCORRECTA=0
 
 paramRutaNombre=$1
-ruta=$2
+ruta="$2"
 paramExtNombre=$3
 ext=$4
 
@@ -32,14 +33,17 @@ cantLineas=0
 comentario=0
 cantFicheros=0
 
+cantLineasTotales=0
+comentariosTotales=0
+
 #funciones
 usage() {
-        echo "Contador codigo fuente"
+        echo "AnalisisCodigoFuente\n"
         echo "Comandos permitidos y obligatorios:"
-        echo "--ruta    Se coloca ruta (path) de los archivos con el codigo fuente a analizar"
-        echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma"
-        echo "Ejemplo:"
-        echo "contadorcodigo.sh --ruta home/usuario/proyecto1 --ext js,css,php"
+        echo "--ruta    Se coloca ruta (path) de los archivos con el c  digo fuente a analizar"
+        echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma\n"
+        echo "Ejemplo:\n"
+        echo "AnalisisCodigoFuente --ruta home/usuario/proyecto1 --ext js,css,php"
 }
 
 validarInputs() {
@@ -86,25 +90,29 @@ validarExtension() {
 
 conteo() {
         (( cantLineas++ ))
+	(( cantLineasTotales++ ))
         #COMENTARIOS CERRADOS   EJ. */ o ninguno
         if [[ $tipoComentario == $COMENTARIO_CERRADO ]]
         then
                 if [[ $comienzoDeLinea == $COMENTARIO_SIMPLE ]]
                 then
                                 (( comentario++ ))
-                elif [[ $comienzoDeLinea == $COMENTARIO_MULTIPLE ]]
+				(( comentariosTotales++ ))
+		elif [[ $comienzoDeLinea == $COMENTARIO_MULTIPLE ]]
                 then
                         (( comentario++ ))
+			(( comentariosTotales++ ))
                         if [[ $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]] #valido si el comentario multiple cierra en la misma linea
                         then
                                 tipoComentario=$COMENTARIO_CERRADO
                         else
-                                tipoComentario=$COMENTARIO_ABIERTO
-                        fi
+				tipoComentario=$COMENTARIO_ABIERTO
+			fi
                 fi
         #COMENTARIOS ABIERTOS   Ej. /*
         else
                 (( comentario++ ))
+		(( comentariosTotales++ ))
 
                 if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE || $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
                 then
@@ -113,52 +121,64 @@ conteo() {
         fi
 }
 
-
 responsePorFichero() {
 codigo=$((cantLineas - comentario))
 porcentajeCodigo=$((codigo*100/cantLineas))
 porcentajeComentario=$((100-porcentajeCodigo))
-echo "Archivo: " $fichero
-echo "Cantidad de lineas de codigo totales: " $codigo " con un porcentaje de: " $porcentajeCodigo"%"
-echo "Cantidad de lineas de comentarios totales:  " $comentario "con un porcentaje de: " $porcentajeComentario"%"
+echo "------------------------------------------------"
+echo "Archivo: " "$fichero"
+echo "Cantidad de lineas de codigo: " $codigo " con un porcentaje de: " $porcentajeCodigo"%"
+echo "Cantidad de lineas de comentarios:  " $comentario "con un porcentaje de: " $porcentajeComentario"%"
+echo "------------------------------------------------"
 }
 
 leerFichero (){
 while read -r linea
                 do
                         comienzoDeLinea=${linea:0:2}
-                        posFinalLinea=${#linea}-1
+                        posFinalLinea=${#linea}
                         finDeLinea=${linea:$posFinalLinea-1:$posFinalLinea}
 
                         conteo
-                 done < $fichero
+                 done < "$fichero"
 }
 
 
 #main
 validarInputs
 
-for fichero in $(ls $ruta)
+#ficheros=$(find "$ruta" -type f)
+for filename in $(ls "$ruta")
 do
-       if [[ -r $fichero ]]
+	fichero="$ruta"/"$filename"
+
+       if [[ -r "$fichero" ]]
        then
                 (( cantFicheros++ ))
 
                 validarExtension
                 if [[ $extension == $EXT_CORRECTA ]]
                 then
-                        (( cantidadFicheros++ ))
+                       (( cantidadFicheros++ ))
                         cantLineas=0
                         comentario=0
                         tipoComentario=$COMENTARIO_CERRADO
                         leerFichero
                         responsePorFichero
                  else
-                        echo "El fichero " $fichero " no cuenta con la extension a analizar"
+                        echo "El fichero " "$fichero" " no cuenta con la extension a analizar"
                 fi
         else
-                echo "NO TIENE PERMISOS PARA ESTE FICHERO: " $fichero
+       	       echo "NO TIENE PERMISOS PARA ESTE FICHERO: " "$fichero"
         fi
 done
+codigoTotal=$((cantLineasTotales - comentariosTotales))
+porcentajeCodigoTotal=$((codigoTotal*100/cantLineasTotales))
+porcentajeComentarioTotal=$((100-porcentajeCodigoTotal))
+echo "------------------------------------------------"
+echo "TOTALES"
 echo "Cantidad de archivos analizados: " $cantFicheros
+echo "Cantidad de lineas de codigo: " $codigoTotal " con un porcentaje de: " $porcentajeCodigoTotal"%"
+echo "Cantidad de comentarios" $comentariosTotales " con un porcentaje de: " $porcentajeComentarioTotal"%"
 exit 1
+
