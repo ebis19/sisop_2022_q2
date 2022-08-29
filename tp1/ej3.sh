@@ -99,7 +99,7 @@ done
 
 main(){
     split_opciones
-    inotify_demonio
+    inotify_demonio &
 }
 
 main
