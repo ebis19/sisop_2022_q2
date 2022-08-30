@@ -1,5 +1,17 @@
 #!/bin/bash
 
+#-----------------------------------------------#
+# Nombre del Script: contadorcodigo.sh          #
+# APL  1                                        #
+# Ejercicio 4                                   #
+# Integrantes:                                  #
+# Molina Lara                   DNI: 40187938   #
+# Lopez Julian                  DNI: 39712927   #
+# Gorbolino Tamara....                          #
+# Elias...                                      #
+# Amelia Colque                 DNI: 34095247   #
+# Entrega                                       #
+#-----------------------------------------------#
 COMENTARIO_SIMPLE="//"
 COMENTARIO_MULTIPLE="/\*"
 FIN_COMENTARIO_MULTIPLE="*/"
@@ -22,12 +34,12 @@ cantFicheros=0
 
 #funciones
 usage() {
-        echo "AnalisisCodigoFuente\n"
+        echo "Contador codigo fuente"
         echo "Comandos permitidos y obligatorios:"
-        echo "--ruta    Se coloca ruta (path) de los archivos con el c  digo fuente a analizar"
-        echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma\n"
-        echo "Ejemplo:\n"
-        echo "AnalisisCodigoFuente --ruta home/usuario/proyecto1 --ext js,css,php"
+        echo "--ruta    Se coloca ruta (path) de los archivos con el codigo fuente a analizar"
+        echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma"
+        echo "Ejemplo:"
+        echo "contadorcodigo.sh --ruta home/usuario/proyecto1 --ext js,css,php"
 }
 
 validarInputs() {
@@ -65,7 +77,6 @@ validarExtension() {
 
                 if [[ $extFichero == ${extensionActual} ]]
                 then
-                        echo "ext correcta"
                         extension=$EXT_CORRECTA
                         break
                 fi
@@ -84,7 +95,12 @@ conteo() {
                 elif [[ $comienzoDeLinea == $COMENTARIO_MULTIPLE ]]
                 then
                         (( comentario++ ))
-                        tipoComentario=$COMENTARIO_ABIERTO
+                        if [[ $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]] #valido si el comentario multiple cierra en la misma linea
+                        then
+                                tipoComentario=$COMENTARIO_CERRADO
+                        else
+                                tipoComentario=$COMENTARIO_ABIERTO
+                        fi
                 fi
         #COMENTARIOS ABIERTOS   Ej. /*
         else
@@ -96,6 +112,7 @@ conteo() {
                 fi
         fi
 }
+
 
 responsePorFichero() {
 codigo=$((cantLineas - comentario))
