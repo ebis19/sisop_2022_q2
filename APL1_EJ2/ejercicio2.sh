@@ -2,15 +2,15 @@
 
 #-----------------------------------------------#
 # Nombre del Script: ejercicio2.sh              #
-# APL 1						                    #
-# Ejercicio 2					                #
+# APL 1						#
+# Ejercicio 2					#
 # Integrantes:                                  #
-# Molina Lara			DNI: 40187938           #
-# Lopez Julian			DNI: 39712927	        #
-# Gorbolino Tamara      DNI: 41668847           #
-# Biscaia Elias			DNI: 40078823	        #
-# Amelia Colque			DNI: 34095247	        #
-# Entrega                                  	    #
+# Molina Lara			DNI: 40187938   #
+# Lopez Julian			DNI: 39712927	#
+# Gorbolino Tamara      	DNI: 41668847  	#
+# Biscaia Elias			DNI: 40078823	#
+# Amelia Colque			DNI: 34095247	#
+# Entrega                                  	#
 #-----------------------------------------------#
 
 IFS='
