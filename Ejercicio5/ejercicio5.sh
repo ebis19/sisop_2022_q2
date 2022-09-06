@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# +++++++++++++++ENCABEZADO+++++++++++++++++++++++++++
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Nombre del Script: ejercicio5.sh
 # APL: 1
 # Ejercicio: 5
@@ -11,7 +11,7 @@
 # 	Elias Biscaia 		      DNI: 40078823             
 # 	Amelia Soledad Colque         DNI: 34095247
 # Nro entrega: entrega
-# +++++++++++++++FIN ENCABEZADO+++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 Ayuda()
@@ -22,15 +22,34 @@ Ayuda()
     echo "  --materias <path> Ruta del archivo con los datos de las materias"
 }
 
-if [[ $1 == "-h" ]] || [[ $1 == "--help" ]] || [[ $1 == "-?" ]]
+if [ $# -eq 1 ] || [ $# -ne 4 ]
 then
-	Ayuda;
-	exit 0;	
+    	if [ $1 == "-h" ] || [ $1 == "--help" ] || [ $1 == "-?" ]
+    	then
+       		Ayuda;
+       		exit 0;
+	else
+        	echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
+            	exit 1;
+    	fi
 fi
 
+
+PARSED_ARGUMENTS=$(getopt -o '' --long "notas:,materias:" -- "$@")
+echo $PARSED_ARGUMENTS
+
+eval set -- "$PARSED_ARGUMENTS"
+while true 
+do 
+    case "$1" in
+    --notas ) notas=$2 ; shift; shift ;;
+    --materias ) materias=$2; shift; shift ;;
+    -- ) shift ; break;;
+    * )  echo "Parametros no válidos" ; break ;;
+    esac
+done
+
 IFS="|"
-notas=$1
-materias=$2
 
 RECUPERATORIO=4
 PARCIAL_1=2
@@ -40,17 +59,17 @@ ID_MATERIA=1
 
 if [ -r $notas ]
 then
-	echo	"Tiene Permisos"
+	echo	"Tiene Permisos" $notas
 else
-	echo	"No tiene permiso"
+	echo	"No tiene permiso" $notas
 	exit 1;
 fi
 
 if [ -r $materias ]
 then
-        echo    "Tiene Permisos"
+        echo    "Tiene Permisos" $materias
 else
-        echo    "No tiene permiso"
+        echo    "No tiene permiso" $materias
         exit 1;
 fi
 
