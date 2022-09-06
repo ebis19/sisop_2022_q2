@@ -23,9 +23,9 @@ Ayuda()
 }
 
 #Validacion de parametros
-if [ $# -eq 1 ] || [ $# -ne 4 ] || [ $# -eq   ]
+if [ $# -eq 1 ] || [ $# -ne 4 ] 
 then
-    	if [ $1 == "-h" ] || [ $1 == "--help" ] || [ $1 == "-?" ]
+    	if [[ $1 == "-h" ]] || [[ $1 == "--help" ]] || [[ $1 == "-?" ]] && [[ $1 != 0 ]]
     	then
        		Ayuda;
        		exit 0;
@@ -67,7 +67,7 @@ else
         exit 1;
 fi
 
-#Procesamiento de archivo nota
+#procesa archivo nota
 IFS="|"
 
 RECUPERATORIO=4
@@ -131,7 +131,7 @@ do
 done < $notas
 
 
-#Se procesa archivo materia
+#procesa archivo materia
 ID_MATERIA=0
 DESCRIPCION_MATERIA=1
 ID_DEPARTAMENTO=2
@@ -160,7 +160,7 @@ do
 	PRIMER_LINEA=0
 done < $materias
 
-#Se escribe el archivo de salida
+#escribe archivo de salida
 salida=$(echo "salida.txt")
 touch "salida.txt"
 echo "{" > "$salida"
