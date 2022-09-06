@@ -41,6 +41,8 @@ while getopts "h:s:c:a:" arg; do
   esac
 done
 
+
+
 #concatenar archivos 
 concatenar() {
     IFS=$'\n';
@@ -78,10 +80,11 @@ IFS=',' read -ra optiones <<< "$options"
             compilar=true
         fi
     done
-}
-if $compilar == false && $publish ; then
+if ! $compilar && $publish ; then
+    echo "No se puede publicar sin compilar"
     exit 1
 fi
+}
 
 inotify_demonio(){
 inotifywait -m -e modify,create,delete,move $dir --format "%f" | while read file; do
