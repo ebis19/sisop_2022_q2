@@ -1,0 +1,6 @@
+DNI|IdMateria|PrimerParcial|SegundoParcial|Recuperatorio|Final
+43212121|3|7|7||
+42736222|1|7|8||
+40516527|1|4|7|8|
+39873524|2|9|10||
+44873524|1|9|2|7|
