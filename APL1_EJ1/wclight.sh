@@ -1,16 +1,16 @@
 #!/bin/bash
 
 #-----------------------------------------------#
-# Nombre del Script: contadorcodigo.sh          #
-# APL 1						#
-# Ejercicio 4					#
+# Nombre del Script: wclight.sh                 #
+# APL 1						                              #
+# Ejercicio 1				                          	#
 # Integrantes:                                  #
-# Molina Lara			DNI: 40187938   #
-# Lopez Julian			DNI: 39712927	#
-# Gorbolino Tamara....				#
-# Biscaia Elias			DNI: 40078823	#
-# Amelia Colque			DNI: 34095247	#
-# Entrega                                  	#
+# Molina Lara			  DNI: 40187938               #
+# Lopez Julian			DNI: 39712927	              #
+# Gorbolino Tamara  DNI: 41668847       				#
+# Biscaia Elias			DNI: 40078823	              #
+# Amelia Colque			DNI: 34095247	              #
+# Entrega                                     	#
 #-----------------------------------------------#
 
 #Mensaje de error de sintaxis y de ayuda
