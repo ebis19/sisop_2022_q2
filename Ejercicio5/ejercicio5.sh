@@ -51,7 +51,7 @@ do
 done
 
 #Validacion de permisos
-if [ -r $notas ]
+if [ -r "$notas" ]
 then
 	echo	"Tiene Permisos" $notas
 else
@@ -59,7 +59,7 @@ else
 	exit 1;
 fi
 
-if [ -r $materias ]
+if [ -r "$materias" ]
 then
         echo    "Tiene Permisos" $materias
 else
