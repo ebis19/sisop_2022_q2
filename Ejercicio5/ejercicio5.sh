@@ -7,7 +7,7 @@
 # Integrantes:
 # 	Molina Lara                   DNI: 40187938
 # 	Lopez Julian                  DNI: 39712927
-# 	Gorbolino Tamara....                       
+# 	Gorbolino Tamara	      DNI: 41668847                      
 # 	Elias Biscaia 		      DNI: 40078823             
 # 	Amelia Soledad Colque         DNI: 34095247
 # Nro entrega: entrega
@@ -22,7 +22,8 @@ Ayuda()
     echo "  --materias <path> Ruta del archivo con los datos de las materias"
 }
 
-if [ $# -eq 1 ] || [ $# -ne 4 ]
+#Validacion de parametros
+if [ $# -eq 1 ] || [ $# -ne 4 ] || [ $# -eq   ]
 then
     	if [ $1 == "-h" ] || [ $1 == "--help" ] || [ $1 == "-?" ]
     	then
@@ -49,14 +50,7 @@ do
     esac
 done
 
-IFS="|"
-
-RECUPERATORIO=4
-PARCIAL_1=2
-PARCIAL_2=3
-FINAL=5
-ID_MATERIA=1
-
+#Validacion de permisos
 if [ -r $notas ]
 then
 	echo	"Tiene Permisos" $notas
@@ -73,6 +67,15 @@ else
         exit 1;
 fi
 
+#Procesamiento de archivo nota
+IFS="|"
+
+RECUPERATORIO=4
+PARCIAL_1=2
+PARCIAL_2=3
+FINAL=5
+ID_MATERIA=1
+
 declare -A promocionan
 declare -A abandonan
 declare -A recursan
@@ -85,13 +88,12 @@ do
 	if [[ $PRIMER_LINEA == 0 ]]
 	then
 		datosAlumno=($linea)
-#		echo ${datosAlumno[0]}
 
 		if [[ -z ${datosAlumno[$FINAL]} ]]
 		then
-			if [[ ${datosAlumno[$RECUPERATORIO]} > 6 ]] #Para rendir el recuperatorio -> p1 o p2 tine nota >= 4
-			then #posibilidad de promocionar o llegar a final
-				if [[ ${datosAlumno[$PARCIAL_1]} > 6 ]] || [[ ${datosAlumno[$PARCIAL_2]} > 6 ]] #minimo un parcial con nota de promoción
+			if [[ ${datosAlumno[$RECUPERATORIO]} > 6 ]] 
+			then 
+				if [[ ${datosAlumno[$PARCIAL_1]} > 6 ]] || [[ ${datosAlumno[$PARCIAL_2]} > 6 ]] 
 					then
 						(( promocionan[${datosAlumno[$ID_MATERIA]}]++ ))
 					else
@@ -123,22 +125,13 @@ do
 		fi
 		
 	fi
-		#falta contemplar finales
 
 	PRIMER_LINEA=0
 
 done < $notas
 
-#echo "RECURSAN id materia " ${!recursan[@]}  
-#echo "Recursan cantidad   " ${recursan[@]}
-#echo "FINAL id materia " ${!final[@]}
-#echo "FINAL cantidad   " ${final[@]}
-#echo "Promocion id materia " ${!promocionan[@]}
-#echo "Promocion cantidad   " ${promocionan[@]}
-#echo "abandoan id materia  " ${!abandonan[@]}
-#echo "abandonan cantidad    " ${abandonan[@]}
 
-#Recorro nano ejercicio5.segundo archivo
+#Se procesa archivo materia
 ID_MATERIA=0
 DESCRIPCION_MATERIA=1
 ID_DEPARTAMENTO=2
@@ -167,8 +160,7 @@ do
 	PRIMER_LINEA=0
 done < $materias
 
-#Escribir Archivo
-
+#Se escribe el archivo de salida
 salida=$(echo "salida.txt")
 touch "salida.txt"
 echo "{" > "$salida"
