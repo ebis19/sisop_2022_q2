@@ -79,19 +79,22 @@ IFS=',' read -ra optiones <<< "$options"
         fi
     done
 }
+if $compilar == false && $publish ; then
+    exit 1
+fi
 
 inotify_demonio(){
 inotifywait -m -e modify,create,delete,move $dir --format "%f" | while read file; do
-        if [ $listar == true ]; then
-            echo "Archivo modificado:" $dir/$file
+        if $listar ; then
+            echo 'Archivo modificado:'"$dir/$file"
         fi
-        if [ $peso == true ]; then
-            echo $(du -h "$dir/$file")
+        if $peso; then
+            echo 'Peso:' $(du -h "$dir/$file")
         fi
-        if [ $compilar == true ]; then
+        if $compilar; then
             concatenar
         fi
-        if [ $publish == true ]; then
+        if $publish; then
              cp "bin/$dir.o" "$publish_dir"
         fi
 done
