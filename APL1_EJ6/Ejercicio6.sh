@@ -97,12 +97,13 @@ recuperar(){
     declare -a arrayArchivos
 
     IFS=$'\n'
-    for archivo in $(realpath $(tar -tf "$papelera"))
+    for archivo in $(tar -tf "$papelera")
     do
         rutaArchivo=$(dirname "$archivo")
         nombreArchivo=$(basename "$archivo")
         if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
         then
+	    rutaArchivoUnico="$archivo"
             let contadorArchivosIguales=contadorArchivosIguales+1
             archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
             arrayArchivos[$contadorArchivosIguales]="$archivo"
@@ -114,11 +115,11 @@ recuperar(){
         echo "No existe el archivo en la papelera"
         exit 1
     else
-        if [ "$contadorArchivosIguales" -eq 1 ];
+        if [ "$contadorArchivosIguales" -eq 1 ];	#Archivo unico
         then
-            tar -xvf "$papelera" "$archivoParaRecuperar" 1> /dev/null 
-            tar -vf "$papelera" --delete "$archivoParaRecuperar" 1> /dev/null
-        else
+            tar -xvf "$papelera" "$rutaArchivoUnico" 1> /dev/null
+            tar -vf "$papelera" --delete "$rutaArchivoUnico" 1> /dev/null
+        else						#Mas de un archivo con el mismo nombre
             echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
             echo "¿Qué archivo desea recuperar?"
             read opcion
