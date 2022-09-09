@@ -1,33 +1,39 @@
 #!/bin/bash
-
-#-----------------------------------------------#
-# Nombre del Script: ejercicio2.sh              #
-# APL 1						#
-# Ejercicio 2					#
-# Integrantes:                                  #
-# Molina Lara			DNI: 40187938   #
-# Lopez Julian			DNI: 39712927	#
-# Gorbolino Tamara      	DNI: 41668847  	#
-# Biscaia Elias			DNI: 40078823	#
-# Amelia Colque			DNI: 34095247	#
-# Entrega                                  	#
-#-----------------------------------------------#
-
 IFS='
 ' 
 
 function ayuda() {
-    echo "El script se ejecuta:"
-    echo "./script.sh -p /home/desktop/fotos -d sabado"
-    echo "./script.sh --path /home/desktop/fotos --dia sabado"
-    echo "./script.sh -h"
+    echo "**********************************************************"
+    echo " Este script procesa archivos de log, donde se registraron"
+    echo " todas las llamadas realizadas en una semana por un call  "
+    echo " center. Se detalla el inicio y el fin de las mismas y el "
+    echo " usuario.                                                 "
+    echo " Obtiene y muestra por pantalla lo siguiente:             " 
+    echo "  1-Promedio de tiempo de las llamadas realizadas por dia." 
+    echo "  2-Promedio de tiempo y cantidad por usuario por dia.    " 
+    echo "  3-Los 3 usuarios con mas llamadas en la semana.         " 
+    echo "  4-Cantidad de llamadas que no superan la media de tiempo" 
+    echo "    por dia.                                              " 
+    echo "  5-El usuario que tiene mas cantidad de llamadas por     " 
+    echo "    debajo de la media en la semana.                      "     
+    echo "                                                          "    
+    echo " Ejemplo:                                                 "
+    echo "  1) Consultar la ayuda:                                  "
+    echo "     ./ejercicio2.sh -h                                   "
+    echo "     ./ejercicio2.sh -?                                   "
+    echo "     ./ejercicio2.sh --help                               "   
+    echo "                                                          " 
+    echo "  2) Ejecutar el script:                                  "
+    echo "     ./ejercicio2.sh --logs /home/desktop/carpeta         "  
+    echo "                                                          " 
+    echo "**********************************************************"
 }
 
 # Validacion en la cantidad de parametros
-if [[ $# -eq 0 || $# -gt 2 || $# -eq 1 || ($1 != "-h" && $1 != "-?" && $1 != "--help" && $1 != "--logs") ]]; 
+if [[ $# -eq 0 || $# -gt 2 || ($# -eq 1 && $1 != "-h" && $1 != "-?" && $1 != "--help") ]]; 
 then
     echo "Error en la cantidad de parametros introducidos."
-    echo "Ingresar -h -? o -help para consultar ayuda."
+    echo "Ingresar -h -? o --help para consultar ayuda."
     exit 1
 fi
 
