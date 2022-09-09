@@ -99,15 +99,16 @@ recuperar(){
     IFS=$'\n'
     for archivo in $(tar -tf "$papelera")
     do
-        rutaArchivo=$(dirname "$archivo")
         nombreArchivo=$(basename "$archivo")
         if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
         then
+	   (( contadorArchivosIguales++ ))
 	    rutaArchivoUnico="$archivo"
-            let contadorArchivosIguales=contadorArchivosIguales+1
-            archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
-            arrayArchivos[$contadorArchivosIguales]="$archivo"
-        fi
+           if [ "$contadorArchivosIguales" -lt 1 ]
+	   then
+		break;
+	   fi
+	fi
     done
 
     if [ "$contadorArchivosIguales" -eq 0 ];
@@ -119,8 +120,26 @@ recuperar(){
         then
             tar -xvf "$papelera" "$rutaArchivoUnico" 1> /dev/null
             tar -vf "$papelera" --delete "$rutaArchivoUnico" 1> /dev/null
-        else						#Mas de un archivo con el mismo nombre
-            echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
+        else
+		#Mas de un archivo con el mismo nombre
+
+	   contadorArchivosIguales=0
+	   archivosIguales=0
+	   archivosIguales=""
+           IFS=$'\n'
+   	   for archivo in $(realpath $(tar -tf "$papelera"))
+    	   do
+        		rutaArchivo=$(dirname "$archivo")
+        		nombreArchivo=$(basename "$archivo")
+        	if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
+        	then
+            		let contadorArchivosIguales=contadorArchivosIguales+1
+            		archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
+            		arrayArchivos[$contadorArchivosIguales]="$archivo"
+        	fi
+   	    done
+
+	    echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
             echo "¿Qué archivo desea recuperar?"
             read opcion
 
