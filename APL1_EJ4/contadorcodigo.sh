@@ -27,6 +27,8 @@ tipoComentario=$COMENTARIO_CERRADO
 cantLineas=0
 comentario=0
 cantFicheros=0
+codigoaEntreComentario=0
+codigoaEntreComentarioTotal=0
 
 cantLineasTotales=0
 comentariosTotales=0
@@ -124,7 +126,29 @@ conteo() {
                         else
 				tipoComentario=$COMENTARIO_ABIERTO
 			fi
-                fi
+
+		#COMENTARIO DE TIPO ...//....
+		elif [[ "$linea" == *"$COMENTARIO_SIMPLE"* ]]
+		then
+			(( comentario++ ))
+			(( comentariosTotales++ ))
+			(( codigoaEntreComentario++ ))
+			(( codigoaEntreComentarioTotal++ ))
+
+		#COMENTARIO DE TIPO ..../*....*/
+		elif [[ "$linea" == *"$COMENTARIO_MULTIPLE"* ]]
+		then
+			(( comentario++ ))
+                        (( comentariosTotales++ ))
+                        (( codigoaEntreComentario++ ))
+                        (( codigoaEntreComentarioTotal++ ))
+
+			#COMENTARRIO QUE NO CIERRA EN LA MISMA LINEA EJ. ...../*.......
+			if [[ "$linea" == *"$FIN_COMENTARIO_MULTIPLE"* ]]
+			then
+				tipoComentario=$COMENTARIO_ABIERTO
+			fi
+		fi
         #COMENTARIOS ABIERTOS   Ej. /*
         else
                 (( comentario++ ))
@@ -138,7 +162,7 @@ conteo() {
 }
 
 responsePorFichero() {
-codigo=$((cantLineas - comentario))
+codigo=$((cantLineas - comentario + codigoaEntreComentario))
 porcentajeCodigo=$((codigo*100/cantLineas))
 porcentajeComentario=$((100-porcentajeCodigo))
 echo "------------------------------------------------"
@@ -176,6 +200,7 @@ do
                        (( cantidadFicheros++ ))
                         cantLineas=0
                         comentario=0
+			codigoaEntreComentario=0
                         tipoComentario=$COMENTARIO_CERRADO
                         leerFichero
                         responsePorFichero
@@ -184,7 +209,7 @@ do
        	       echo "NO TIENE PERMISOS PARA ESTE FICHERO: " "$fichero"
         fi
 done
-codigoTotal=$((cantLineasTotales - comentariosTotales))
+codigoTotal=$((cantLineasTotales - comentariosTotales + codigoaEntreComentarioTotal))
 porcentajeCodigoTotal=$((codigoTotal*100/cantLineasTotales))
 porcentajeComentarioTotal=$((100-porcentajeCodigoTotal))
 echo "------------------------------------------------"
