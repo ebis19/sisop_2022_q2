@@ -144,7 +144,7 @@ conteo() {
                         (( codigoaEntreComentarioTotal++ ))
 
 			#COMENTARRIO QUE NO CIERRA EN LA MISMA LINEA EJ. ...../*.......
-			if [[ "$linea" == *"$FIN_COMENTARIO_MULTIPLE"* ]]
+			if [[ "$linea" != *"$FIN_COMENTARIO_MULTIPLE"* ]]
 			then
 				tipoComentario=$COMENTARIO_ABIERTO
 			fi
@@ -157,6 +157,12 @@ conteo() {
                 if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE || $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
                 then
                         tipoComentario=$COMENTARIO_CERRADO
+
+		elif [[ "$linea" == *"$FIN_COMENTARIO_MULTIPLE"* ]]
+		then
+			tipoComentario=$COMENTARIO_CERRADO
+			(( codigoaEntreComentario++ ))
+                        (( codigoaEntreComentarioTotal++ ))
                 fi
         fi
 }
