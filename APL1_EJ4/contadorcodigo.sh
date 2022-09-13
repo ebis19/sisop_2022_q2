@@ -10,7 +10,7 @@
 # Gorbolino Tamara              DNI: 41668847   #
 # Biscaia Elias			DNI: 40078823	#
 # Amelia Colque			DNI: 34095247	#
-# Entrega                                  	#
+# Nro entrega: 2                                #
 #-----------------------------------------------#
 
 COMENTARIO_SIMPLE="//"
