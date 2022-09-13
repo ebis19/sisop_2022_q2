@@ -2,15 +2,15 @@
 
 #-----------------------------------------------#
 # Nombre del Script: Ejercicio6.sh              #
-# APL 1						#
-# Ejercicio 6			        	#
+# APL 1						                    #
+# Ejercicio 6			        	            #
 # Integrantes:                                  #
-# Molina Lara			DNI: 40187938   #
-# Lopez Julian			DNI: 39712927	#
-# Gorbolino Tamara      	DNI: 41668847   #
-# Biscaia Elias			DNI: 40078823	#
-# Amelia Colque			DNI: 34095247	#
-# Entrega                                  	#
+# Molina Lara			DNI: 40187938           #
+# Lopez Julian			DNI: 39712927	        #
+# Gorbolino Tamara      	DNI: 41668847       #
+# Biscaia Elias			DNI: 40078823	        #
+# Amelia Colque			DNI: 34095247	        #
+# Entrega                                  	    #
 #-----------------------------------------------#
 
 ayuda(){
@@ -61,14 +61,14 @@ listar(){
         exit 1
     fi
 
-    if [ $(tar -tf "$papelera" | wc -c) -eq 0 ];
+    if [ $(tar -Ptf "$papelera" | wc -c) -eq 0 ];
     then
         echo "Papelera se encuentra vacía"
         exit 1
     fi
 
     IFS=$'\n'
-    for archivo in $(realpath $(tar -tf "$papelera"))
+    for archivo in $(realpath $(tar -Ptf "$papelera"))
     do
         rutaArchivo=$(dirname "$archivo")
         nombreArchivo=$(basename "$archivo")
@@ -97,16 +97,18 @@ recuperar(){
     declare -a arrayArchivos
 
     IFS=$'\n'
-    for archivo in $(realpath $(tar -tf "$papelera"))
+    for archivo in $(tar -Ptf "$papelera")
     do
-        rutaArchivo=$(dirname "$archivo")
         nombreArchivo=$(basename "$archivo")
         if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
         then
-            let contadorArchivosIguales=contadorArchivosIguales+1
-            archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
-            arrayArchivos[$contadorArchivosIguales]="$archivo"
-        fi
+	   (( contadorArchivosIguales++ ))
+	    rutaArchivoUnico="$archivo"
+           if [ "$contadorArchivosIguales" -lt 1 ]
+	   then
+		break;
+	   fi
+	fi
     done
 
     if [ "$contadorArchivosIguales" -eq 0 ];
@@ -114,12 +116,30 @@ recuperar(){
         echo "No existe el archivo en la papelera"
         exit 1
     else
-        if [ "$contadorArchivosIguales" -eq 1 ];
+        if [ "$contadorArchivosIguales" -eq 1 ];	#Archivo unico
         then
-            tar -xvf "$papelera" "$archivoParaRecuperar" 1> /dev/null 
-            tar -vf "$papelera" --delete "$archivoParaRecuperar" 1> /dev/null
+            tar -Pxvf "$papelera" "$rutaArchivoUnico" 1> /dev/null
+            tar -Pvf "$papelera" --delete "$rutaArchivoUnico" 1> /dev/null
         else
-            echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
+		#Mas de un archivo con el mismo nombre
+
+	   contadorArchivosIguales=0
+	   archivosIguales=0
+	   archivosIguales=""
+           IFS=$'\n'
+   	   for archivo in $(realpath $(tar -Ptf "$papelera"))
+    	   do
+        		rutaArchivo=$(dirname "$archivo")
+        		nombreArchivo=$(basename "$archivo")
+        	if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
+        	then
+            		let contadorArchivosIguales=contadorArchivosIguales+1
+            		archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
+            		arrayArchivos[$contadorArchivosIguales]="$archivo"
+        	fi
+   	    done
+
+	    echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
             echo "¿Qué archivo desea recuperar?"
             read opcion
 
@@ -128,7 +148,7 @@ recuperar(){
             elementoNumero=0
             indice=0
             IFS=$'\n'
-            for archivo in $(realpath $(tar -tf "$papelera"))
+            for archivo in $(realpath $(tar -Ptf "$papelera"))
             do
                 let indice=$indice+1
                 if [ "$seleccion" == "$archivo" ];
@@ -143,8 +163,8 @@ recuperar(){
                 let indice=$indice+1
                 if [ "$indice" == "$elementoNumero" ];
                 then
-                    tar -xvf "$papelera" "$archivo" 1> /dev/null
-                    tar -vf "$papelera" --delete "$archivo" 1> /dev/null 
+                    tar -Pxvf "$papelera" "$archivo" 1> /dev/null
+                    tar -Pvf "$papelera" --delete "$archivo" 1> /dev/null 
                 fi
             done
         fi
@@ -155,7 +175,7 @@ recuperar(){
 vaciar(){
     papelera="${HOME}/papelera.zip"
     rm "$papelera"
-    tar -cf "$papelera" --files-from /dev/null
+    tar -Pcf "$papelera" --files-from /dev/null
 }
 
 eliminar(){
@@ -170,9 +190,9 @@ eliminar(){
     fi
     if [ ! -f "$papelera" ];
     then
-        tar -cvf "$papelera" "$archivoEliminar" > /dev/null
+        tar -Pcvf "$papelera" "$archivoEliminar" > /dev/null
     else
-        tar -rvf "$papelera" "$archivoEliminar" > /dev/null
+        tar -Prvf "$papelera" "$archivoEliminar" > /dev/null
     fi
     rm "$archivoEliminar"
     echo "Archivo eliminado"
@@ -199,7 +219,7 @@ archivoParaBorrar="$1"
     declare -a arrayArchivos
 
     IFS=$'\n'
-    for archivo in $(realpath $(tar -tf "$papelera"))
+    for archivo in $(realpath $(tar -Ptf "$papelera"))
     do
         rutaArchivo=$(dirname "$archivo")
         nombreArchivo=$(basename "$archivo")
@@ -218,7 +238,7 @@ archivoParaBorrar="$1"
     else
         if [ "$contadorArchivosIguales" -eq 1 ];
         then
-            tar -vf "$papelera" --delete "$archivoParaBorrar" 1> /dev/null 
+            tar -Pvf "$papelera" --delete "$archivoParaBorrar" 1> /dev/null 
         else
             echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
             echo "¿Qué archivo desea borar?"
@@ -229,7 +249,7 @@ archivoParaBorrar="$1"
             elementoNumero=0
             indice=0
             IFS=$'\n'
-            for archivo in $(realpath $(tar -tf "$papelera"))
+            for archivo in $(realpath $(tar -Ptf "$papelera"))
             do
                 let indice=$indice+1
                 if [ "$seleccion" == "$archivo" ];
@@ -239,12 +259,12 @@ archivoParaBorrar="$1"
             done
             indice=0
             IFS=$'\n'
-            for archivo in $(tar -tf "$papelera")
+            for archivo in $(tar -Ptf "$papelera")
             do
                 let indice=$indice+1
                 if [ "$indice" == "$elementoNumero" ];
                 then
-                    tar -vf "$papelera" --delete "$archivo" 1> /dev/null 
+                    tar -Pvf "$papelera" --delete "$archivo" 1> /dev/null 
                 fi
             done
         fi

@@ -22,11 +22,6 @@ COMENTARIO_CERRADO=0
 EXT_CORRECTA=1
 EXT_INCORRECTA=0
 
-paramRutaNombre=$1
-ruta="$2"
-paramExtNombre=$3
-ext=$4
-
 tipoComentario=$COMENTARIO_CERRADO
 
 cantLineas=0
@@ -36,6 +31,9 @@ cantFicheros=0
 cantLineasTotales=0
 comentariosTotales=0
 
+#----------------------------
+
+#Validacion de parametros
 #funciones
 usage() {
         echo "contador de codigo"
@@ -44,28 +42,46 @@ usage() {
         echo "--ext     Se colocan las extensiones de los archivos a analizar, separadas por coma"
         echo "Ejemplo:\n"
         echo "./contadorcodigo.sh --ruta home/usuario/proyecto1 --ext js,css,php"
+
+	exit 0
 }
 
-validarInputs() {
 
-        if [[ $paramRutaNombre == "-h" ]] || [[ $paramRutaNombre == "--help" ]] || [[ $paramRutaNombre == "-?" ]]
-        then
-                usage
-                exit 0
-        elif [[ $paramRutaNombre != "--ruta" ]]
-        then
-                echo "Parametro " $paramRutaNombre " desconocido"
-                echo "--help para obtener ayuda"
-                exit 1
+#----------------------------
 
-        elif [[ $paramExtNombre != "--ext" ]]
+#Validacion de parametros
+if [ $# -eq 1 ]
+then
+        if [[ $1 == "-h" ]] || [[ $1 == "--help" ]] || [[ $1 == "-?" ]]
         then
-                echo "Parametro " $paramExtNombre " desconocido"
-                echo "--help para obtener ayuda"
-                exit 1
+		if [ $# -eq 1 ]
+		then
+                	usage;
+                	exit 0;
+        	else
+                	echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
+                	exit 1;
+		fi
         fi
-}
+	elif [[ $# < 4 ]]
+	then
+		echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
+        	exit 1;
+fi
 
+
+PARSED_ARGUMENTS=$(getopt -o '' --long "ruta:,ext:" -- "$@")
+        eval set -- "$PARSED_ARGUMENTS"
+
+        while true
+        do
+                case "$1" in
+                --ruta ) ruta="$2" ; shift; shift ;;
+                --ext ) ext="$2"; shift; shift ;;
+                -- ) shift ; break;;
+                * ) echo "Parametros no validas" ; break ;;
+                esac
+        done
 
 validarExtension() {
         extension=$EXT_INCORRECTA
@@ -145,17 +161,15 @@ while read -r linea
 
 
 #main
-validarInputs
+#validarInputs
 
-#ficheros=$(find "$ruta" -type f)
+
 for filename in $(ls "$ruta")
 do
 	fichero="$ruta"/"$filename"
 
        if [[ -r "$fichero" ]]
        then
-                (( cantFicheros++ ))
-
                 validarExtension
                 if [[ $extension == $EXT_CORRECTA ]]
                 then
@@ -165,8 +179,6 @@ do
                         tipoComentario=$COMENTARIO_CERRADO
                         leerFichero
                         responsePorFichero
-                 else
-                        echo "El fichero " "$fichero" " no cuenta con la extension a analizar"
                 fi
         else
        	       echo "NO TIENE PERMISOS PARA ESTE FICHERO: " "$fichero"
@@ -177,7 +189,7 @@ porcentajeCodigoTotal=$((codigoTotal*100/cantLineasTotales))
 porcentajeComentarioTotal=$((100-porcentajeCodigoTotal))
 echo "------------------------------------------------"
 echo "TOTALES"
-echo "Cantidad de archivos analizados: " $cantFicheros
+echo "Cantidad de archivos analizados: " $cantidadFicheros
 echo "Cantidad de lineas de codigo: " $codigoTotal " con un porcentaje de: " $porcentajeCodigoTotal"%"
 echo "Cantidad de comentarios" $comentariosTotales " con un porcentaje de: " $porcentajeComentarioTotal"%"
 exit 1
