@@ -37,7 +37,7 @@ fi
 
 
 #!/bin/bash
-while getopts "h:s:c:a:" arg; do
+while getopts "s:c:a:h" arg; do
   case $arg in
     h)
       usage
