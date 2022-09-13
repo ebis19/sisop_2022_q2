@@ -87,11 +87,15 @@ fi
 }
 
 inotify_demonio(){
-inotifywait -m -e modify,create,delete,move $dir --format "%f" | while read file; do
+inotifywait -m -e modify,delete,create,move $dir --format "%f" | while read file; do
         if $listar ; then
-            echo 'Archivo modificado:'"$dir/$file"
+            if [ -f "$dir/$file" ]; then
+                echo 'Archivo creado o modificado:'"$dir/$file"
+            else
+                echo 'Archivo eliminado:'"$dir/$file"
+            fi 
         fi
-        if $peso; then
+        if [ -f "$dir/$file" ] &&  $peso; then
             echo 'Peso:' $(du -h "$dir/$file")
         fi
         if $compilar; then
