@@ -60,7 +60,10 @@ done
 concatenar() {
     IFS=$'\n';
     for file in $(ls -1 $dir); do
-        cat "$dir""/""$file" >> "bin/$dir.o"
+        if [ -f $dir/$file ]; then
+            cat "$dir""/""$file" >> "bin/$dir.o"
+        fi
+        
     done
 }
 
@@ -93,6 +96,7 @@ IFS=',' read -ra optiones <<< "$options"
             compilar=true
         fi
     done
+
 if ! $compilar && $publish ; then
     echo "No se puede publicar sin compilar"
     exit 1
@@ -100,7 +104,7 @@ fi
 }
 
 inotify_demonio(){
-inotifywait -m -e modify,delete,create,move $dir --format "%f" | while read file; do
+inotifywait -q -m -e  modify,delete,create,move $dir --format "%f" | while read file; do
         if $listar ; then
             if [ -f "$dir/$file" ]; then
                 echo 'Archivo creado o modificado:'"$dir/$file"
@@ -115,14 +119,21 @@ inotifywait -m -e modify,delete,create,move $dir --format "%f" | while read file
             concatenar
         fi
         if $publish; then
-             cp "bin/$dir.o" "$publish_dir"
+            if [ -f "bin/$dir.o"]; then
+                cp "bin/$dir.o" "$publish_dir"
+            fi
         fi
 done
 }
 
 main(){
     split_opciones
+     if $compilar; then
+        concatenar
+    fi
+    if $publish; then
+        cp "bin/$dir.o" "$publish_dir"
+    fi
     inotify_demonio &
 }
-
 main
