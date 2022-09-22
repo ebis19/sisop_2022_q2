@@ -102,8 +102,7 @@ IFS=',' read -ra optiones <<< "$options"
         elif [ $i == "compilar" ]; then
             compilar=true
         else
-            echo "Evento a monitoriar no valido"
-            usage
+            echo "Accion a monitoriar no valido"
             exit 1
         fi
     done
@@ -131,16 +130,17 @@ fi
 }
 
 inotify_demonio(){
-inotifywait -q -m -e  modify,delete,create,move $dir --format "%f" | while read file; do
+inotifywait -q -m -e  modify,delete,create,move $dir --format "%f,%e" | while read file; do
+        IFS=',' read -ra var <<< "$file"
+        file_name=${var[0]}
+        event=${var[1]}
         if $listar ; then
-            if [ -f "$dir/$file" ]; then
-                echo 'Archivo creado o modificado:'"$dir/$file"
-            else
-                echo 'Archivo eliminado:'"$dir/$file"
+            if [ -f "$dir/$file_name" ]; then
+                echo 'Archivo:'"$dir/$file_name", 'Evento:'"$event"
             fi 
         fi
-        if [ -f "$dir/$file" ] &&  $peso; then
-            echo 'Peso:' $(du -h "$dir/$file")
+        if [ -f "$dir/$file_name" ] &&  $peso; then
+            echo 'Peso:' $(du -h "$dir/$file_name")
         fi
         if $compilar; then
             concatenar
