@@ -25,18 +25,27 @@
 usage() {
     echo "Usage: $0 -c <path> -a <action> -s <path>"
     echo "  -c <path>  Path to watch"
-    echo "  -a <action> Action to perform"
+    echo "  -a <action> Action to perform when a change is detected"
     echo "  -s <path>  Path to publish"
+    echo "  -h  Show this help"
+    echo "The accions can be : publish, compilar, listar y peso."
+    echo "Important cosider that the path to watch must be a directory"
+    echo "and the path to publish must be a directory."
+    echo "To Publish action needs a compilar action"
+    echo "Example : $0 -c ./dir -a compilar,publish"
+    echo "Example 2 : $0 -c ./dir -a listar,peso"
     exit 1
 }
 
 if [ $# -eq 0 ]; then
-    echo "No se ha especificado un directorio"
+    echo "Error: No arguments provided"
     exit 1
 fi
 
+dir=false
+publish_dir=false
+options=""
 
-#!/bin/bash
 while getopts "s:c:a:h" arg; do
   case $arg in
     h)
@@ -59,8 +68,10 @@ done
 #concatenar archivos 
 concatenar() {
     IFS=$'\n';
-    for file in $(ls -1 $dir); do
-        cat "$dir""/""$file" >> "bin/$dir.o"
+    for file in $(find $dir); do
+        if [ -f $file ]; then
+            cat "$file" >> "bin/$dir.o"
+        fi
     done
 }
 
@@ -82,47 +93,71 @@ IFS=',' read -ra optiones <<< "$options"
     for i in "${optiones[@]}"; do
         if [ $i == "publish" ]; then
             publish=true
-        fi
-        if [ $i == "listar" ]; then
-            listar=true
-        fi       
-        if [ $i == "peso" ]; then
+        elif [ $i == "listar" ]; then
+            listar=true       
+        elif [ $i == "peso" ]; then
             peso=true
-        fi
-        if [ $i == "compilar" ]; then
+        
+        elif [ $i == "compilar" ]; then
             compilar=true
+        else
+            echo "Accion a monitoriar no valido"
+            exit 1
         fi
     done
-if ! $compilar && $publish ; then
-    echo "No se puede publicar sin compilar"
+
+if ! [ -d $dir ]; then
+    echo "You must specify a valid directory"
     exit 1
 fi
+
+
+if $compilar &&  ! [ -d "./bin" ] ; then
+    mkdir "bin"
+fi
+
+if ! $compilar && $publish ; then
+    echo "You can't publish without compiling"
+    exit 1
+fi
+
+if ! [ -d $publish_dir ] && $publish ; then
+    echo "You must specify a valid directory to publish"
+    exit 1
+fi
+
 }
 
 inotify_demonio(){
-inotifywait -m -e modify,delete,create,move $dir --format "%f" | while read file; do
+inotifywait -r -q -m -e  modify,delete,create,move $dir --format "%w%f,%e" | while read file; do
+        IFS=',' read -ra var <<< "$file"
+        file_name=${var[0]}
+        event=${var[1]}
         if $listar ; then
-            if [ -f "$dir/$file" ]; then
-                echo 'Archivo creado o modificado:'"$dir/$file"
-            else
-                echo 'Archivo eliminado:'"$dir/$file"
-            fi 
+            echo 'Archivo:'"$file_name", 'Evento:'"$event"
         fi
-        if [ -f "$dir/$file" ] &&  $peso; then
-            echo 'Peso:' $(du -h "$dir/$file")
+        if [ -f "$file_name" ] &&  $peso; then
+            echo 'Peso:' $(du -h "$file_name")
         fi
         if $compilar; then
             concatenar
         fi
         if $publish; then
-             cp "bin/$dir.o" "$publish_dir"
+            if [ -f "bin/$dir.o"]; then
+                cp "bin/$dir.o" "$publish_dir"
+            fi
         fi
 done
 }
 
 main(){
     split_opciones
+     if $compilar; then
+        concatenar
+    fi
+    if $publish; then
+        cp "bin/$dir.o" "$publish_dir"
+    fi
     inotify_demonio &
 }
-
 main
