@@ -137,6 +137,8 @@ inotifywait -q -m -e  modify,delete,create,move $dir --format "%f,%e" | while re
         if $listar ; then
             if [ -f "$dir/$file_name" ]; then
                 echo 'Archivo:'"$dir/$file_name", 'Evento:'"$event"
+            else
+                echo 'Archivo eliminado:'"$dir/$file_name"
             fi 
         fi
         if [ -f "$dir/$file_name" ] &&  $peso; then
