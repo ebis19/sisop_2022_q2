@@ -2,15 +2,15 @@
 
 #-----------------------------------------------#
 # Nombre del Script: wclight.sh                 #
-# APL 1						#
-# Ejercicio 1				        #
+# APL 1                                         #
+# Ejercicio 1                                   #
 # Integrantes:                                  #
-# Molina Lara			DNI: 40187938	#
-# Lopez Julian			DNI: 39712927	#
-# Gorbolino Tamara  		DNI: 41668847	#
-# Biscaia Elias			DNI: 40078823	#
-# Amelia Colque			DNI: 34095247	#
-# Nro entrega: 2                                     	#
+# Molina Lara                     DNI: 40187938	#
+# Lopez Julian                    DNI: 39712927	#
+# Gorbolino Tamara                DNI: 41668847	#
+# Biscaia Elias                   DNI: 40078823	#
+# Amelia Colque                   DNI: 34095247	#
+# Nro entrega: 3                                #
 #-----------------------------------------------#
 
 #Mensaje de error de sintaxis y de ayuda

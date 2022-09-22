@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Nombre del Script: ejercicio5.sh
-# APL: 1
-# Ejercicio: 5
-# Integrantes:
-# 	Molina Lara                   DNI: 40187938
-# 	Lopez Julian                  DNI: 39712927
-# 	Gorbolino Tamara	      DNI: 41668847                      
-# 	Elias Biscaia 		      DNI: 40078823             
-# 	Amelia Soledad Colque         DNI: 34095247
-# Nro entrega: 2
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++ #
+# Nombre del Script: ejercicio5.sh              #
+# APL 1                                         #
+# Ejercicio 5                                   #
+# Integrantes:                                  #
+# Molina Lara                     DNI: 40187938 #
+# Lopez Julian                    DNI: 39712927 #
+# Gorbolino Tamara                DNI: 41668847 #
+# Biscaia Elias                   DNI: 40078823 #
+# Amelia Colque                   DNI: 34095247 #
+# Nro entrega: 3                                #
+# --------------------------------------------- #
 
 
 Ayuda()
