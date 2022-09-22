@@ -37,7 +37,6 @@ fi
 
 
 PARSED_ARGUMENTS=$(getopt -o '' --long "notas:,materias:" -- "$@")
-echo $PARSED_ARGUMENTS
 
 eval set -- "$PARSED_ARGUMENTS"
 while true 
@@ -158,11 +157,12 @@ do
 	fi	
   
 	PRIMER_LINEA=0
+
 done < $materias
 
 #escribe archivo de salida
-salida=$(echo "salida.txt")
-touch "salida.txt"
+salida=$(echo "salida.json")
+touch "salida.json"
 echo "{" > "$salida"
 echo "	“departamentos”: [" >> "$salida"
 
@@ -173,15 +173,40 @@ do
 	echo "		“notas”: [" >> "$salida" 
 	for idMateria in ${!materia[@]}
 	do
-		if [[ $depto == ${materia[$idMateria]} ]]
+		if [[ $depto == ${materia[$idMateria]}  ]]
 		then
 			echo "		{" >> "$salida"
-        		echo "			“id_materia”: " $idMateria >> "$salida"
+        		echo "			“id_materia”: "  $idMateria >> "$salida"
         		echo "			“descripcion”: " ${descripcionMateria[$idMateria]}  >> "$salida"
-			echo "			“final”: " ${final[$idMateria]}  >> "$salida"
-			echo "			“recursan”: " ${recursan[$idMateria]}  >> "$salida"
-			echo "			“abandonaron”: " ${abandonan[$idMateria]}  >> "$salida"
-			echo "			“promocionan”: " ${promocionan[$idMateria]}  >> "$salida"
+
+       			if [ -z ${final[$idMateria]} ]
+			then 
+				echo "			“final”: 0"  >> "$salida"
+			else
+			 	echo "			“final”: "  $idMateria  >> "$salida"
+			fi
+			
+			if [ -z ${recursan[$idMateria]} ]
+			then
+				echo "			“recursan”: 0"  >> "$salida"
+			else
+				echo "			“recursan”: " ${recursan[$idMateria]}  >> "$salida"
+			fi
+
+			if [ -z ${abandonan[$idMateria]} ]
+			then
+				echo "			“abandonaron”: 0"  >> "$salida"
+			else
+				echo "			“abandonaron”: " ${abandonan[$idMateria]}  >> "$salida"
+			fi
+
+			if [ -z ${promocionan[$idMateria]} ]
+			then
+				echo "			“promocionan”: 0"  >> "$salida"
+			else
+				echo "			“promocionan”: " ${promocionan[$idMateria]}  >> "$salida"
+			fi
+
 			echo "		}," >> "$salida"
 		fi
 	done
