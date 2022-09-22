@@ -130,19 +130,15 @@ fi
 }
 
 inotify_demonio(){
-inotifywait -q -m -e  modify,delete,create,move $dir --format "%f,%e" | while read file; do
+inotifywait -r -q -m -e  modify,delete,create,move $dir --format "%w%f,%e" | while read file; do
         IFS=',' read -ra var <<< "$file"
         file_name=${var[0]}
         event=${var[1]}
         if $listar ; then
-            if [ -f "$dir/$file_name" ]; then
-                echo 'Archivo:'"$dir/$file_name", 'Evento:'"$event"
-            else
-                echo 'Archivo eliminado:'"$dir/$file_name"
-            fi 
+            echo 'Archivo:'"$file_name", 'Evento:'"$event"
         fi
-        if [ -f "$dir/$file_name" ] &&  $peso; then
-            echo 'Peso:' $(du -h "$dir/$file_name")
+        if [ -f "$file_name" ] &&  $peso; then
+            echo 'Peso:' $(du -h "$file_name")
         fi
         if $compilar; then
             concatenar
