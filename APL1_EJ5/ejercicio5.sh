@@ -188,7 +188,7 @@ do
 			then 
 				echo "			“final”: 0"  >> "$salida"
 			else
-			 	echo "			“final”: "  $idMateria  >> "$salida"
+			 	echo "			“final”: "  ${final[$idMateria]}  >> "$salida"
 			fi
 			
 			if [ -z ${recursan[$idMateria]} ]
