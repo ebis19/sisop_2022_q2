@@ -68,11 +68,10 @@ done
 #concatenar archivos 
 concatenar() {
     IFS=$'\n';
-    for file in $(ls -1 $dir); do
-        if [ -f $dir/$file ]; then
-            cat "$dir""/""$file" >> "bin/$dir.o"
+    for file in $(find $dir); do
+        if [ -f $file ]; then
+            cat "$file" >> "bin/$dir.o"
         fi
-        
     done
 }
 
