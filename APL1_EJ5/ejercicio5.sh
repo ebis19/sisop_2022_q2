@@ -138,7 +138,9 @@ PRIMER_LINEA=1
 declare -a departamento
 declare -A materia
 declare -A descripcionMateria
+declare -a materias1
 
+index=0
 while read linea
 do
 	if [[ $PRIMER_LINEA == 0 ]]
@@ -150,15 +152,18 @@ do
 			departamento[${datosMateria[$ID_DEPARTAMENTO]}]=${datosMateria[$ID_DEPARTAMENTO]}
 			
 		fi
-
+		materias1[$index]=${datosMateria[$ID_MATERIA]}
 		materia[${datosMateria[$ID_MATERIA]}]=${datosMateria[$ID_DEPARTAMENTO]}
-		descripcionMateria[${datosMateria[$ID_MATERIA]}]=${datosMateria[$DESCRIPCION_MATERIA]}		
 
+		descripcionMateria[${datosMateria[$ID_MATERIA]}]=${datosMateria[$DESCRIPCION_MATERIA]}		
+		(( index++ ))
 	fi	
   
 	PRIMER_LINEA=0
 
 done < $materias
+ 
+
 
 #escribe archivo de salida
 salida=$(echo "salida.json")
@@ -171,7 +176,7 @@ do
 	echo "	   {" >> "$salida"
 	echo "		“id”: " $depto >> "$salida"
 	echo "		“notas”: [" >> "$salida" 
-	for idMateria in ${!materia[@]}
+	for idMateria in ${materias1[@]}
 	do
 		if [[ $depto == ${materia[$idMateria]}  ]]
 		then
