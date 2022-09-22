@@ -25,18 +25,27 @@
 usage() {
     echo "Usage: $0 -c <path> -a <action> -s <path>"
     echo "  -c <path>  Path to watch"
-    echo "  -a <action> Action to perform"
+    echo "  -a <action> Action to perform when a change is detected"
     echo "  -s <path>  Path to publish"
+    echo "  -h  Show this help"
+    echo "The accions can be : publish, compilar, listar y peso."
+    echo "Important cosider that the path to watch must be a directory"
+    echo "and the path to publish must be a directory."
+    echo "To Publish action needs a compilar action"
+    echo "Example : $0 -c ./dir -a compilar,publish"
+    echo "Example 2 : $0 -c ./dir -a listar,peso"
     exit 1
 }
 
 if [ $# -eq 0 ]; then
-    echo "No se ha especificado un directorio"
+    echo "Error: No arguments provided"
     exit 1
 fi
 
+dir=false
+publish_dir=false
+options=""
 
-#!/bin/bash
 while getopts "s:c:a:h" arg; do
   case $arg in
     h)
@@ -85,22 +94,40 @@ IFS=',' read -ra optiones <<< "$options"
     for i in "${optiones[@]}"; do
         if [ $i == "publish" ]; then
             publish=true
-        fi
-        if [ $i == "listar" ]; then
-            listar=true
-        fi       
-        if [ $i == "peso" ]; then
+        elif [ $i == "listar" ]; then
+            listar=true       
+        elif [ $i == "peso" ]; then
             peso=true
-        fi
-        if [ $i == "compilar" ]; then
+        
+        elif [ $i == "compilar" ]; then
             compilar=true
+        else
+            echo "Evento a monitoriar no valido"
+            usage
+            exit 1
         fi
     done
 
-if ! $compilar && $publish ; then
-    echo "No se puede publicar sin compilar"
+if ! [ -d $dir ]; then
+    echo "You must specify a valid directory"
     exit 1
 fi
+
+
+if $compilar &&  ! [ -d "./bin" ] ; then
+    mkdir "bin"
+fi
+
+if ! $compilar && $publish ; then
+    echo "You can't publish without compiling"
+    exit 1
+fi
+
+if ! [ -d $publish_dir ] && $publish ; then
+    echo "You must specify a valid directory to publish"
+    exit 1
+fi
+
 }
 
 inotify_demonio(){
