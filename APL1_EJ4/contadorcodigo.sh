@@ -71,10 +71,8 @@ then
         	exit 1;
 fi
 
-
-PARSED_ARGUMENTS=$(getopt -o '' --long "ruta:,ext:" -- "$@")
+PARSED_ARGUMENTS=$(getopt -o '' -l "ruta:,ext:" -a -- "$@")
         eval set -- "$PARSED_ARGUMENTS"
-
         while true
         do
                 case "$1" in
@@ -84,6 +82,18 @@ PARSED_ARGUMENTS=$(getopt -o '' --long "ruta:,ext:" -- "$@")
                 * ) echo "Parametros no validas" ; break ;;
                 esac
         done
+
+if [[ -z "$ruta" || -z "$ext" ]]
+then
+	echo "Parametros no validos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de ./contadorcodigo.sh"
+	exit 1
+fi
+
+if [ ! -d "$ruta" ]
+then
+   echo "El directorio ${ruta} no existe"
+   exit 1
+fi
 
 validarExtension() {
         extension=$EXT_INCORRECTA
@@ -193,6 +203,7 @@ while read -r linea
 #main
 #validarInputs
 
+ENTRO=0
 
 for filename in $(ls "$ruta")
 do
@@ -210,11 +221,19 @@ do
                         tipoComentario=$COMENTARIO_CERRADO
                         leerFichero
                         responsePorFichero
+			ENTRO=1
                 fi
         else
        	       echo "NO TIENE PERMISOS PARA ESTE FICHERO: " "$fichero"
         fi
 done
+
+if [[ $ENTRO == 0 ]]
+then
+	echo "No fue posible analizar ningun fichero"
+	exit 1
+fi
+
 codigoTotal=$((cantLineasTotales - comentariosTotales + codigoaEntreComentarioTotal))
 porcentajeCodigoTotal=$((codigoTotal*100/cantLineasTotales))
 porcentajeComentarioTotal=$((100-porcentajeCodigoTotal))
