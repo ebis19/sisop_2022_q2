@@ -121,6 +121,10 @@ do
 				else
 					(( final[${datosAlumno[$ID_MATERIA]}]++ ))
 			fi
+
+		elif [[ ${datosAlumno[$FINAL]} < 4 ]]
+		then
+			(( recursan[${datosAlumno[$ID_MATERIA]}]++ ))
 		fi
 		
 	fi
