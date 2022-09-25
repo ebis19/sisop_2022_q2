@@ -9,7 +9,7 @@
   • Informar un total de las metricas anteriormente mencionadas
  
  .EXAMPLE
- .\contadorcodigo.ps1 -ruta ./pruebas -ext js,css,php
+ .\ejercicio4.ps1 -ruta ./pruebas -ext js,css,php
 
 #>
 
