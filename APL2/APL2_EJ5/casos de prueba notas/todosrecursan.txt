@@ -1,0 +1,4 @@
+DNI|IdMateria|PrimerParcial|SegundoParcial|Recuperatorio|Final
+41736222|2|2|3||
+42736222|2|2|4|3|
+40586527|2|7|2|2|
