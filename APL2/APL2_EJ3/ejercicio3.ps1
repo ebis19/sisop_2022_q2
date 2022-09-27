@@ -26,7 +26,7 @@
 [cmdletbinding()]
 Param(
     [Parameter(Mandatory=$true)]
-    [String]
+    [String[]]
     [ValidateNotNullOrEmpty()]
     $accion,
     [Parameter(Mandatory = $true,
@@ -91,8 +91,14 @@ Function Register-Watcher {
         EnableRaisingEvents   = $true
     }
     $listarString = '
-    $name = $Event.SourceEventArgs.Name
+    $name = $Event.SourceEventArgs.FullPath
      Write-Host "The file $name"'
+    $listarString+= "`n"
+
+    $pesoString = '
+    $name = $Event.SourceEventArgs.FullPath
+    $size = (Get-Item $name).Length
+    Write-Host "The file $name has $size bytes"'
     $listarString+= "`n"
     $accionExecute= ''
     $compilarString =
@@ -102,6 +108,7 @@ Function Register-Watcher {
         $content += Get-Content $file}
     $content | Out-File bin/compilado.o'
     $compilarString+= "`n"
+    $compilarString+= "`n"
 
     $publicarString =
     '$filesPublicar = Get-ChildItem "bin" -Filter *
@@ -109,6 +116,7 @@ Function Register-Watcher {
             Copy-Item $file.FullName ' + $publish +
     '}'
     $publicarString+= "`n"
+
     foreach ($accion in $acciones)  {
         if ($accion -eq "compilar") {
             $CompilarBoolean  = $true
@@ -124,12 +132,15 @@ Function Register-Watcher {
         }
     }
 
-
     if($CompilarBoolean){
         $accionExecute += " " + $compilarString
+        $comp=[Scriptblock]::Create($compilarString)
+        &$comp
     }
     if($PublicarBoolean){
         $accionExecute += " " + $publicarString
+        $publ=[Scriptblock]::Create($publicarString)
+        &$publ
     }
     if($ListarBoolean){
         $accionExecute += " " + $listarString
