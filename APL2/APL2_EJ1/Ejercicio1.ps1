@@ -40,7 +40,7 @@ Write-Host "El path no existe"
 # #--------------------------------------------------------------------------
 # Pregunta 1
 #
-# El objetivo del scrip es listar los procesos que consumen más de 100MB de memoria RAM.
+# El objetivo del script es listar los procesos que consumen más de 100MB de memoria RAM.
 # donde debe  recibir como parámetro el path de un archivo de texto donde se guardarán los procesos.
 # Además, debe recibir un parámetro opcional que indique la cantidad de procesos a mostrar.
 #
