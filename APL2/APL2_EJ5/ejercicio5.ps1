@@ -91,7 +91,6 @@ foreach ($linea in $archivo) {
                 }
             }elseif (0 -eq $datosAlumno[$RECUPERATORIO]) {
 
-                Write-Host $datosAlumno[$PARCIAL_2]
                 if ( [int16]$datosAlumno[$PARCIAL_1] -ge 7 -and [int16]$datosAlumno[$PARCIAL_2] -ge 7 ){ #ge mayo o igual
                     $promocionan[$datosAlumno[$ID_MATERIA]]++
                 }   
