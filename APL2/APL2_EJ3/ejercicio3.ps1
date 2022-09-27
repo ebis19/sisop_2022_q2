@@ -1,13 +1,30 @@
 <#
- .SYNOPSIS
+    .SYNOPSIS
+    El script monitorea  los archvos de un directorio 
+    
+    .DESCRIPTION
 
- .DESCRIPTION
+    Parametros de entrada
+    -directorio: path del directorio que contiene los archivos a monitoriar
+    -accion listar de acciones cuendo se detecta un cambio en el directorio
+    -publish: directorio donde se realizan las publicaciones
+    -Get-Help
+    Acciones posibles:
+    -publicar: publica los archivos en el directorio de publicaciones
+    -compilar: compila los archivos en el directorio
+    -peso: muestra el peso de los archivos en el directorio de monitoriado
+    -listar: lista los archivos que cambiaron en el directorio de monitoriado
 
- .EXAMPLE
- 
+    El orden de  los parametros es indistinto
 
+    .EXAMPLE
+    ./ejercicio3.ps1 -directorio dir -accion listar,compilar 
+
+    .EXAMPLE
+    ./ejercicio5.ps1 -materias pathArchivoMaterias.txt -notas pathArchivoNotas.txt
 #>
 
+#carga de parametros
 
 #-----------------------------------------------#
 # Nombre del Script: contadorcodigo.sh          #
