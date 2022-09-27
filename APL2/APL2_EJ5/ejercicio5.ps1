@@ -22,9 +22,6 @@
     Parametros de entrada
     -notas: path del archivo que muestra las notas de los alumnos
     -materias path del archivo con las materias en las que pueden estar los alumnos
-    -Get-Help
-
-    El orden de  los parametros es indistinto
 
     .EXAMPLE
     ./ejercicio5.ps1 -notas pathArchivoNotas.txt -materias pathArchivoMaterias.txt
@@ -36,9 +33,15 @@
 #carga de parametros
 [cmdletbinding()]
 Param(
-    [Parameter(ParameterSetName="ejecucion")]
+    [Parameter(Mandatory=$true)]
+    # [ValidateScript({
+    #     Test-Path $_ 
+    # })]
     $notas,
-    [Parameter(ParameterSetName="ejecucion")]
+    [Parameter(Mandatory=$true)]
+    # [ValidateScript({
+    #     Test-Path $_ 
+    # })]
     $materias
 )
 
@@ -88,11 +91,16 @@ foreach ($linea in $archivo) {
                 }
             }elseif (0 -eq $datosAlumno[$RECUPERATORIO]) {
 
+                Write-Host $datosAlumno[$PARCIAL_2]
                 if ( [int16]$datosAlumno[$PARCIAL_1] -ge 7 -and [int16]$datosAlumno[$PARCIAL_2] -ge 7 ){ #ge mayo o igual
                     $promocionan[$datosAlumno[$ID_MATERIA]]++
                 }   
-				elseif ( 0 -eq $datosAlumno[$PARCIAL_1] -or  $datosAlumno[$PARCIAL_2] -eq 0 ){
+				elseif ( 0 -eq [int16]$datosAlumno[$PARCIAL_1]) {
                     $abandonan[$datosAlumno[$ID_MATERIA]]++
+                }
+                elseif ([int16]$datosAlumno[$PARCIAL_2] -eq 0 ){
+                    $abandonan[$datosAlumno[$ID_MATERIA]]++
+
                 }
 				elseif ( [int16]$datosAlumno[$PARCIAL_1] -lt 4 -and [int16]$datosAlumno[$PARCIAL_2] -lt 4 ){ #menor que 
                     $recursan[$datosAlumno[$ID_MATERIA]]++
