@@ -89,95 +89,127 @@ PUBLICAR="publicar"
 #FUNCIONES-----------------------------------------------
 
 listar(){
-	echo "LISTAR"
+	echo 'Archivo:'"$nombre_fichero", 'Evento:'"$event"
 }
 
 peso(){
-	echo "PESO"
+	peso_archivo=$(du "$nombre_fichero")
+	echo  "Peso: $peso_archivo"
 }
 
 compilar(){
-	echo "COMPILAR"
+
+if ! [ -d "./bin" ] ; then
+    mkdir "bin"
+fi
+if  [ -f "bin/compilado" ] ; then
+    rm  "bin/compilado"
+fi
+	IFS=$'\n';
+
+	for arch in $(find "$ruta_monitoreo"); do
+        	if [ -f "$arch" ]; then
+            		cat "$arch" >> "bin/compilado"
+        	fi
+    	done
 }
 
 publicar(){
-	echo "PUBLICAR"
+
+if ! [ -d "$ruta_publicar" ] ; then
+	mkdir "$ruta_publicar"
+fi
+
+if [ -f "bin/compilado" ]; then
+	touch "$ruta_publicar/publicado"
+fi
+
+if [ -f "bin/compilado" ]; then
+        cp "bin/compilado" "$ruta_publicar/publicado"
+fi
+
 }
 
+generarNombreArchivo(){
+ 	posFinalFile=${#file_name}-1
+
+        fichero=${file_name:0:$posFinalFile-3}
+
+        posfinalfichero=${#fichero}-1
+        ficheroExt=${fichero:posfinalfichero-3:1}
+
+       	tieneExtension=0
+        if [[ $ficheroExt == '.' ]]
+        then
+        	tieneExtension=1
+      	fi
+
+	punto=${fichero:0:1}
+
+	if [[ $punto == '.' ]]
+	then
+		nombre_fichero+='.'
+	fi
+
+      	IFS='.' read -ra split_fichero <<< "$fichero"
+
+      	ultimo=`expr ${#split_fichero[@]} - 1`
+
+      	for i in ${!split_fichero[@]}
+      	do
+        	if [[ $i == $ultimo && $tieneExtension == 1 ]]
+                then
+                	nombre_fichero+=".${split_fichero[i]}"
+                else
+                        nombre_fichero+="${split_fichero[i]}"
+                fi
+       	done
+}
 
 monitorear(){
 	inotifywait -r -q -m -e  modify,delete,create,move "$ruta_monitoreo" --format "%w%f,%e" | while read file; do
-        	IFS=',' read -ra var <<< "$file"
-        	file_name=${var[0]}
-        	event=${var[1]}
+        IFS=',' read -ra var <<< "$file"
+        file_name=${var[0]}
+        event=${var[1]}
 
-		posFinalFile=${#file_name}-1
-#,/test/.vacio
-                fichero=${file_name:0:$posFinalFile-3}
+	nombre_fichero=""
 
-		posfinalfichero=${#fichero}-1
-		ficheroExt=${fichero:posfinalfichero-3:1}
-		
-		echo "EXTENSION = $ficheroExt"
-		tieneExtension=0
-		if [[ $ficheroExt == '.' ]]
-		then
-			echo "tiene extension"
-			tieneExtension=1
-		fi
+	generarNombreArchivo
 
-		IFS='.' read -ra split_fichero <<< "$fichero"
+	for i in ${!acciones[@]}
+	do
+		if [[ ${acciones[i]} == $COMPILAR ]]
+        		then
+                		compilar
 
-		ultimo=`expr ${#split_fichero[@]} - 1`
+        		elif [[ ${acciones[i]} == $PUBLICAR ]]
+        		then
+                		publicar
 
-		nombre_fichero=""
+        		elif [[ ${acciones[i]} == $LISTAR ]]
+        		then
+                		listar
 
-		for i in ${!split_fichero[@]}
-		do
-			echo "i = $i , ultimo == $ultimo"
-			if [[ $i == $ultimo && $tieneExtension == 1 ]]
+			elif [[ ${acciones[i]} == $PESO ]]
 			then
-				nombre_fichero+=".${split_fichero[i]}"
-			else
-				nombre_fichero+="${split_fichero[i]}"
-			fi
+				peso
+        		fi
 		done
 
-		echo 'Archivo:'"$nombre_fichero", 'Evento:'"$event"
 	done
 }
 
 splitAcciones(){
 	 IFS=',' read -r -a acciones <<< "$acciones"
 }
+
+
+
 #MAIN----------------------------------------------------
-
-
 
 splitAcciones
 
-for i in ${!acciones[@]}
-do
-	if [[ ${acciones[i]} == $COMPILAR ]]
-	then
-        	compilar
-
-	elif [[ ${acciones[i]} == $PUBLICAR ]]
-	then
-        	publicar
-
-	elif [[ ${acciones[i]} == $LISTAR || ${acciones[i]} == $PESO ]]
-	then
-		DEMONIO_ACTIVADO=1
-	fi
-done
-
-
-
-if [[ $DEMONIO_ACTIVADO == 1 ]]
-then
-	monitorear
-fi
+monitorear
 
 
 
