@@ -105,8 +105,13 @@ publicar(){
 }
 
 
-monitoreo(){
-	echo "MONITOREO"
+monitorear(){
+	inotifywait -r -q -m -e  modify,delete,create,move "$ruta_monitoreo" --format "%w%f,%e" | while read file; do
+        	IFS=',' read -ra var <<< "$file"
+        	file_name=${var[0]}
+        	event=${var[1]}
+           	echo 'Archivo:'"$file_name", 'Evento:'"$event"
+	done
 }
 
 splitAcciones(){
@@ -130,13 +135,16 @@ do
 
 	elif [[ ${acciones[i]} == $LISTAR || ${acciones[i]} == $PESO ]]
 	then
-		$DEMONIO_ACTIVADO=1
+		DEMONIO_ACTIVADO=1
 	fi
 done
 
 
 
-
+if [[ $DEMONIO_ACTIVADO == 1 ]]
+then
+	monitorear
+fi
 
 
 
