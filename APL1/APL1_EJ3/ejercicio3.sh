@@ -110,7 +110,40 @@ monitorear(){
         	IFS=',' read -ra var <<< "$file"
         	file_name=${var[0]}
         	event=${var[1]}
-           	echo 'Archivo:'"$file_name", 'Evento:'"$event"
+
+		posFinalFile=${#file_name}-1
+#,/test/.vacio
+                fichero=${file_name:0:$posFinalFile-3}
+
+		posfinalfichero=${#fichero}-1
+		ficheroExt=${fichero:posfinalfichero-3:1}
+		
+		echo "EXTENSION = $ficheroExt"
+		tieneExtension=0
+		if [[ $ficheroExt == '.' ]]
+		then
+			echo "tiene extension"
+			tieneExtension=1
+		fi
+
+		IFS='.' read -ra split_fichero <<< "$fichero"
+
+		ultimo=`expr ${#split_fichero[@]} - 1`
+
+		nombre_fichero=""
+
+		for i in ${!split_fichero[@]}
+		do
+			echo "i = $i , ultimo == $ultimo"
+			if [[ $i == $ultimo && $tieneExtension == 1 ]]
+			then
+				nombre_fichero+=".${split_fichero[i]}"
+			else
+				nombre_fichero+="${split_fichero[i]}"
+			fi
+		done
+
+		echo 'Archivo:'"$nombre_fichero", 'Evento:'"$event"
 	done
 }
 
