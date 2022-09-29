@@ -87,6 +87,8 @@ PARSED_ARGUMENTS=$(getopt -o "s:c:a:h:?" -l "" -a -- "$@")
                 esac
         done
 
+#TODO: VALIDAR ARGUMENTOS
+
 #CONSTANTES----------------------------------------------
 
 DEMONIO_ACTIVADO=0
@@ -104,7 +106,7 @@ listar(){
 }
 
 peso(){
-	peso_archivo=$(du "$nombre_fichero")
+	peso_archivo=$(du -h "$nombre_fichero") #Suele dar 4K porque es espacio en disco y el minimo que se le da es eso.
 	echo  "Peso: $peso_archivo"
 }
 
@@ -202,27 +204,33 @@ monitorear(){
 
 	generarNombreArchivo
 
-	echo "$nombre_fichero $event"
-	#for i in ${!acciones[@]}
-	#	do
-	#		if [[ ${acciones[i]} == $COMPILAR ]]
-        #		then
-         #       		compilar
-#
- #       		elif [[ ${acciones[i]} == $PUBLICAR ]]
-  #      		then
-   #             		publicar
-#
- #       		elif [[ ${acciones[i]} == $LISTAR ]]
-  #      		then
-   #             		listar
-#
-#			elif [[ ${acciones[i]} == $PESO ]]
-#			then
-#				peso
- #       		fi
-#		done
-#
+	COMPILADO=0
+
+	for i in ${!acciones[@]}
+		do
+			if [[ ${acciones[i]} == $COMPILAR && COMPILADO == 0 ]]	#si en el array de acciones la publicacion esta antes que la compilacion, se compilara antes de publicar, por ende
+        		then							#con COMPILADO == 0 nos aseguramos que no se compile dos veces en el mismo evento
+        	       		compilar
+
+	       		elif [[ ${acciones[i]} == $PUBLICAR ]]
+        		then
+				if [[ COMPILADO == 0 ]]			#Si no se compilo, compilamos
+				then
+					compilar
+				fi
+
+                		publicar
+
+        		elif [[ ${acciones[i]} == $LISTAR ]]
+        		then
+                		listar
+
+			elif [[ ${acciones[i]} == $PESO && "$event" != "DELETE" ]] #Si se borra el archivo no tiene peso
+			then
+				peso
+        		fi
+		done
+
 	done
 
 }
