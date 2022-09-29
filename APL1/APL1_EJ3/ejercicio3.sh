@@ -118,6 +118,7 @@ fi
 if  [ -f "bin/compilado" ] ; then
     rm  "bin/compilado"
 fi
+
 	IFS=$'\n';
 
 	for arch in $(find "$ruta_monitoreo"); do
@@ -133,10 +134,6 @@ publicar(){
 
 if ! [ -d "$ruta_publicar" ] ; then
 	mkdir "$ruta_publicar"
-fi
-
-if [ -f "bin/compilado" ]; then
-	touch "$ruta_publicar/publicado"
 fi
 
 if [ -f "bin/compilado" ]; then
@@ -208,13 +205,13 @@ monitorear(){
 
 	for i in ${!acciones[@]}
 		do
-			if [[ ${acciones[i]} == $COMPILAR && COMPILADO == 0 ]]	#si en el array de acciones la publicacion esta antes que la compilacion, se compilara antes de publicar, por ende
+			if [[ ${acciones[i]} == $COMPILAR && $COMPILADO == 0 ]]	#si en el array de acciones la publicacion esta antes que la compilacion, se compilara antes de publicar, por ende
         		then							#con COMPILADO == 0 nos aseguramos que no se compile dos veces en el mismo evento
         	       		compilar
 
 	       		elif [[ ${acciones[i]} == $PUBLICAR ]]
         		then
-				if [[ COMPILADO == 0 ]]			#Si no se compilo, compilamos
+				if [[ $COMPILADO == 0 ]]			#Si no se compilo, compilamos
 				then
 					compilar
 				fi
