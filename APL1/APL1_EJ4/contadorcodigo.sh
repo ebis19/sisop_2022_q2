@@ -220,7 +220,7 @@ do
 			codigoaEntreComentario=0
                         tipoComentario=$COMENTARIO_CERRADO
                         leerFichero
-                        responsePorFichero
+                        #responsePorFichero
 			ENTRO=1
                 fi
         else
@@ -238,7 +238,6 @@ codigoTotal=$((cantLineasTotales - comentariosTotales + codigoaEntreComentarioTo
 porcentajeCodigoTotal=$((codigoTotal*100/cantLineasTotales))
 porcentajeComentarioTotal=$((100-porcentajeCodigoTotal))
 echo "------------------------------------------------"
-echo "TOTALES"
 echo "Cantidad de archivos analizados: " $cantidadFicheros
 echo "Cantidad de lineas de codigo: " $codigoTotal " con un porcentaje de: " $porcentajeCodigoTotal"%"
 echo "Cantidad de comentarios" $comentariosTotales " con un porcentaje de: " $porcentajeComentarioTotal"%"
