@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #-----------------------------------------------#
-# Nombre del Script: ej3.sh                     #
+# Nombre del Script: ejercicio3.s               #
 # APL 1                                         #
 # Ejercicio 3                                   #
 # Integrantes:                                  #
@@ -23,17 +23,27 @@
 #notficar cambios de un detreminado directorio con inotifywait
 
 usage() {
-    echo "Usage: $0 -c <path> -a <action> -s <path>"
-    echo "  -c <path>  Path to watch"
-    echo "  -a <action> Action to perform when a change is detected"
-    echo "  -s <path>  Path to publish"
-    echo "  -h  Show this help"
-    echo "The accions can be : publish, compilar, listar y peso."
-    echo "Important cosider that the path to watch must be a directory"
-    echo "and the path to publish must be a directory."
-    echo "To Publish action needs a compilar action"
-    echo "Example : $0 -c ./dir -a compilar,publish"
-    echo "Example 2 : $0 -c ./dir -a listar,peso"
+    echo "------------------------AYUDA------------------------------"
+    echo "Este script simula un sistema de integración continua, ejecutando"
+    echo "una serie de acciones(listar, peso, compilar, publicar) cada vez que se detecta un cambio en un directorio"
+    echo "    "
+    echo "Parametros que recibe: "
+    echo "      -c <path>  ruta del directorio a monitorear"
+    echo "      -a <action> acciones separadas con coma a ejecutar ante cambios en el directorio"
+    echo "      -s <path>  ruta del directorio utilizado por la acción publicar"
+    echo "      -h o --help o -?  muestra la ayuda"
+    echo "      "
+    echo "Ejemplo:"
+    echo "1) Consultar la ayuda: "
+    echo "      ./Ejercicio6.sh -h"
+    echo "      ./Ejercicio6.sh --help"
+    echo "      ./Ejercicio6.sh -?"
+    echo "     "
+    echo "2) Utilizar la accion publicar: "
+    echo "      $0 -c repo -a listar,compilar,publicar -s salidas/publicar"
+    echo "     "
+    echo "3) No utilizar la opcion publicar: "
+    echo "      $0 -c ../repo -a listar,peso"
     exit 1
 }
 
