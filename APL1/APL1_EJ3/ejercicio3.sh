@@ -86,6 +86,7 @@ PESO="peso"
 COMPILAR="compilar"
 PUBLICAR="publicar"
 
+COMPILADO=0
 #FUNCIONES-----------------------------------------------
 
 listar(){
@@ -112,6 +113,8 @@ fi
             		cat "$arch" >> "bin/compilado"
         	fi
     	done
+
+	COMPILADO=1
 }
 
 publicar(){
@@ -130,23 +133,37 @@ fi
 
 }
 
+#Esta funcion se necesita porque la ruta del archivo dada por el inotify llega con puntos intermedios y una extension .swp.
+#necesitando formatear el nombre al correcto para enviarlas correctamente para las acciones que las necesiten
 generarNombreArchivo(){
- 	posFinalFile=${#file_name}-1
+ 	posFinalFile=`expr ${#file_name} - 1`
 
-        fichero=${file_name:0:$posFinalFile-3}
+	if [[ $posFinalFile -gt 4 ]] #para create, modify, delete se le agrega la extension .swp al archivo, pero no el  momento del guardado. Verificamos si lo tiene
+	then
+		tieneswp=${file_name:$posFinalFile-3:$posFinalFile}
+	else
+		tieneswp=""
+	fi
+
+	if [[ "$tieneswp" == ".swp" ]]				#En caso de que la ruta del archivo contenga la extension .swp se la sacamos
+	then
+       		fichero=${file_name:0:$posFinalFile-3}
+	else
+		fichero="$file_name"
+	fi
 
         posfinalfichero=${#fichero}-1
         ficheroExt=${fichero:posfinalfichero-3:1}
 
        	tieneExtension=0
-        if [[ $ficheroExt == '.' ]]
+        if [[ $ficheroExt == '.' ]]			#Verifico que el archivo tenga una extension ejemplo nombre.text para tenerlo en cuenta en la concatenacion que forma la ruta/nombre
         then
         	tieneExtension=1
       	fi
 
 	punto=${fichero:0:1}
 
-	if [[ $punto == '.' ]]
+	if [[ $punto == '.' ]]				#verifico que la ruta comience con ./ para escribir el punto al principio de la concatenacion
 	then
 		nombre_fichero+='.'
 	fi
@@ -176,26 +193,27 @@ monitorear(){
 
 	generarNombreArchivo
 
-	for i in ${!acciones[@]}
-	do
-		if [[ ${acciones[i]} == $COMPILAR ]]
-        		then
-                		compilar
-
-        		elif [[ ${acciones[i]} == $PUBLICAR ]]
-        		then
-                		publicar
-
-        		elif [[ ${acciones[i]} == $LISTAR ]]
-        		then
-                		listar
-
-			elif [[ ${acciones[i]} == $PESO ]]
-			then
-				peso
-        		fi
-		done
-
+	echo "$nombre_fichero $event"
+	#for i in ${!acciones[@]}
+	#	do
+	#		if [[ ${acciones[i]} == $COMPILAR ]]
+        #		then
+         #       		compilar
+#
+ #       		elif [[ ${acciones[i]} == $PUBLICAR ]]
+  #      		then
+   #             		publicar
+#
+ #       		elif [[ ${acciones[i]} == $LISTAR ]]
+  #      		then
+   #             		listar
+#
+#			elif [[ ${acciones[i]} == $PESO ]]
+#			then
+#				peso
+ #       		fi
+#		done
+#
 	done
 }
 
