@@ -224,7 +224,10 @@ monitorear(){
 
 			elif [[ ${acciones[i]} == $PESO && "$event" != "DELETE" ]] #Si se borra el archivo no tiene peso
 			then
-				peso
+				if [[ "$event" != "MOVED_FROM" ]]
+				then
+					peso
+				fi
         		fi
 		done
 
