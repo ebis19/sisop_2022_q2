@@ -65,7 +65,7 @@ then
                 usage;
                 exit 0;
         else
-                echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
+                echo "Parametro $1 incorrecto, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
                 exit 1;
         fi
 	elif [[ $# < 4 ]]
