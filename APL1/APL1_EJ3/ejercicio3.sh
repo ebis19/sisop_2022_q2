@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #-----------------------------------------------#
-# Nombre del Script: ejercicio3.s               #
+# Nombre del Script: ejercicio3.sh              #
 # APL 1                                         #
 # Ejercicio 3                                   #
 # Integrantes:                                  #
@@ -44,6 +44,8 @@ usage() {
     echo "     "
     echo "3) No utilizar la opcion publicar: "
     echo "      $0 -c ../repo -a listar,peso"
+    echo "   "
+    echo "Aclaracion: tener instalado inotify-tools"
     exit 1
 }
 
@@ -238,9 +240,88 @@ splitAcciones(){
 
 
 
+
 #MAIN----------------------------------------------------
 
 splitAcciones
+
+#Validacion de publicar solo si esta la accion compilar
+isCompilar=0
+isPublicar=0
+
+cant_compilado=0
+cant_publicado=0
+cant_listado=0
+cant_peso=0
+for accion  in ${acciones[@]}
+do
+	#valido si la accion ingresada es opcion permitida
+	if [[ $accion != $COMPILAR && $accion != $PUBLICAR && $accion != $PESO && $accion != $LISTAR  ]]
+        then
+		echo "La accion $accion no esta permitida"
+		exit 1
+	fi
+
+	#valido si accion compilar esta repetida
+	if [[ $accion == $COMPILAR ]]
+	then
+		(( cant_compilado++ ))
+		isCompilar=1
+		if [[ $cant_compilo > 1 ]]
+		then
+			echo "La accion compilar esta repetida"
+			exit 1
+		fi
+	fi
+
+	#valido si la accion publicar esta repetida
+	if [[ $accion == $PUBLICAR ]]
+        then
+                isPublicar=1
+		(( cant_publicado++ ))
+                if [[ $cant_publicado > 1 ]]
+                then
+                        echo "La accion publicar esta repetida"
+                        exit 1
+                fi
+        fi
+
+	#valido si la accion peso esta repetida
+	if [[ $accion == $PESO ]]
+        then
+                (( cant_peso++ ))
+                if [[ $cant_peso > 1 ]]
+                then
+                        echo "La accion peso esta repetida"
+                        exit 1
+                fi
+        fi
+
+	#valido si la accion listar esta repetida
+	if [[ $accion == $LISTAR ]]
+        then
+                (( cant_listado++ ))
+                if [[ $cant_listado > 1 ]]
+                then
+                        echo "La accion listar esta repetida"
+                        exit 1
+                fi
+        fi
+done
+
+#VALIDO SI QUIERE PUBLICAR SIN COMPILAR
+if [[ $isPublicar == 1 && $isCompilar == 0  ]]
+then
+     echo "No se puede publicar sin compilar"
+     exit 1
+fi
+
+#VALIDO SI QUIERE PUBLICAR SIN UNA CARPETA PARA PUBLICAR
+if [[ $isPublicar == 1 && -z "$ruta_publicar" ]]
+then
+     echo "No puedo publicar si no existe una ruta para publicar"
+     exit 1
+fi
 
 monitorear
 
