@@ -61,14 +61,12 @@ if [ $# -eq 1 ]
 then
         if [[ $1 == "-h" ]] || [[ $1 == "--help" ]] || [[ $1 == "-?" ]]
         then
-		if [ $# -eq 1 ]
-		then
-                	usage;
-                	exit 0;
-        	else
-                	echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
-                	exit 1;
-		fi
+
+                usage;
+                exit 0;
+        else
+                echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
+                exit 1;
         fi
 	elif [[ $# < 4 ]]
 	then
@@ -76,7 +74,7 @@ then
         	exit 1;
 fi
 
-PARSED_ARGUMENTS=$(getopt -o "s:c:a:h:?" -l "" -a -- "$@")
+PARSED_ARGUMENTS=$(getopt -o "s:c:a" -l "" -a -- "$@")
         eval set -- "$PARSED_ARGUMENTS"
         while true
         do
