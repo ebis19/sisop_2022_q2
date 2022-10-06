@@ -267,7 +267,7 @@ do
 	then
 		(( cant_compilado++ ))
 		isCompilar=1
-		if [[ $cant_compilo > 1 ]]
+		if [[ $cant_compilado > 1 ]]
 		then
 			echo "La accion compilar esta repetida"
 			exit 1
