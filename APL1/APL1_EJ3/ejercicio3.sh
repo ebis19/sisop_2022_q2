@@ -35,9 +35,9 @@ usage() {
     echo "      "
     echo "Ejemplo:"
     echo "1) Consultar la ayuda: "
-    echo "      ./Ejercicio6.sh -h"
-    echo "      ./Ejercicio6.sh --help"
-    echo "      ./Ejercicio6.sh -?"
+    echo "      ./ejercicio3.sh -h"
+    echo "      ./ejercicio3.sh --help"
+    echo "      ./ejercicio3.sh -?"
     echo "     "
     echo "2) Utilizar la accion publicar: "
     echo "      $0 -c repo -a listar,compilar,publicar -s salidas/publicar"
@@ -52,7 +52,7 @@ usage() {
 
 #VALIDACION DE PARAMETROS---------------------------
 if [ $# -eq 0 ]; then
-    echo "Error: No arguments provided"
+    echo "No ingreso parametros"
     exit 1
 fi
 
@@ -65,7 +65,7 @@ then
                 usage;
                 exit 0;
         else
-                echo "Cantidad de parametros incorrectos, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
+                echo "Parametro $1 incorrecto, para obtener mas ayuda ejecutar el comando -h, --help o -? seguido de $0";
                 exit 1;
         fi
 	elif [[ $# < 4 ]]
@@ -74,7 +74,7 @@ then
         	exit 1;
 fi
 
-PARSED_ARGUMENTS=$(getopt -o "s:c:a" -l "" -a -- "$@")
+PARSED_ARGUMENTS=$(getopt -o "s:c:a:" -l "" -a -- "$@")
         eval set -- "$PARSED_ARGUMENTS"
         while true
         do
@@ -83,7 +83,7 @@ PARSED_ARGUMENTS=$(getopt -o "s:c:a" -l "" -a -- "$@")
                 -a ) acciones="$2"; shift; shift ;;
  		-s ) ruta_publicar="$2"; shift; shift ;;
                 -- ) shift ; break;;
-                * ) echo "Parametros no validas" ; break ;;
+                * ) echo "Parametros no validas"; break ;;
                 esac
         done
 
