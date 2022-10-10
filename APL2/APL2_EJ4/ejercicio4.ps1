@@ -3,10 +3,9 @@
   Permite contar la cantidad de líneas de código y de comentarios que poseen los archivos en una ruta pasada por parámetro y controlando solo los archivos con cierta extensión
  .DESCRIPTION
   Acciones que puede realizar: 
-  • Informar la cantidad de líneas de codigo por archivo 
-  • Informar la cantidad de líneas de comentarios por archivo
-  • Informar el porcentaje de codigo y comentario por archivo
-  • Informar un total de las metricas anteriormente mencionadas
+  • Informar la cantidad de Archvivos analizados
+  • Informar la cantidad de lineas de codigo de los archivos junto a su porcentaje
+  • Informar la cantidad de lineas de comentarios de los archivos junto a su porcentaje 
  
  .EXAMPLE
  .\ejercicio4.ps1 -ruta ./pruebas -ext js,css,php
@@ -72,7 +71,6 @@ $codigo = 0
 $comentariosTotales = 0
 $codigoTotal = 0
 $porcentajeCodigo = 0
-$porcentajeComentario = 0
 $cantidadLineas = 0
 $cantidadLineasTotales = 0
 $cantidadFicheros = 0
@@ -173,17 +171,10 @@ foreach ($filename in $(Get-ChildItem -Path ./"$ruta" | % { $_.Name })) {
         
 
             [int]$porcentajeCodigo = $(($codigo * 100 / $cantidadLineas))
-            $porcentajeComentario = $((100 - $porcentajeCodigo))
 
             $comentariosTotales += $comentarios
             $codigoTotal += $codigo
             $cantidadLineasTotales += $cantidadLineas
-
-            Write-Host "------------------------------------------------"
-            Write-Host "Archivo: " "$filename"
-            Write-Host "Cantidad de lineas de codigo: " $codigo " con un porcentaje de: " $porcentajeCodigo"%"
-            Write-Host "Cantidad de lineas de comentarios:  " $comentarios "con un porcentaje de: " $porcentajeComentario"%"
-            Write-Host "------------------------------------------------"
         }
     }
 }
@@ -198,7 +189,6 @@ if($cantidadLineasTotales -eq 0)
 $porcentajeComentarioTotal = $((100 - $porcentajeCodigoTotal))
 
 Write-Host "------------------------------------------------"
-Write-Host "TOTALES"
 Write-Host "Cantidad de archivos analizados: " $cantidadFicheros
 Write-Host "Cantidad de lineas de codigo: " $codigoTotal " con un porcentaje de: " $porcentajeCodigoTotal"%"
 Write-Host "Cantidad de comentarios" $comentariosTotales " con un porcentaje de: " $porcentajeComentarioTotal"%"
