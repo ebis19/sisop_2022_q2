@@ -1,30 +1,3 @@
-<#
-    .SYNOPSIS
-    El script monitorea  los archvos de un directorio 
-    
-    .DESCRIPTION
-
-    Parametros de entrada
-    -directorio: path del directorio que contiene los archivos a monitoriar
-    -accion listar de acciones cuendo se detecta un cambio en el directorio
-    -publish: directorio donde se realizan las publicaciones
-    -Get-Help
-    Acciones posibles:
-    -publicar: publica los archivos en el directorio de publicaciones
-    -compilar: compila los archivos en el directorio
-    -peso: muestra el peso de los archivos en el directorio de monitoriado
-    -listar: lista los archivos que cambiaron en el directorio de monitoriado
-
-    El orden de  los parametros es indistinto
-
-    .EXAMPLE
-    ./ejercicio3.ps1 -directorio dir -accion listar,compilar 
-
-    .EXAMPLE
-    ./ejercicio5.ps1 -materias pathArchivoMaterias.txt -notas pathArchivoNotas.txt
-#>
-
-#carga de parametros
 
 #-----------------------------------------------#
 # Nombre del Script: contadorcodigo.sh          #
@@ -39,139 +12,108 @@
 # Nro entrega: 1                                #
 #-----------------------------------------------#
 
+<#
+    .SYNOPSIS
+    El script monitorea  los archvos de un directorio especificado en -c
+    
+    .DESCRIPTION
+    
+    Parametros de entrada
+    -c direccion del directorio que contiene los archivos a monitoriar
+    -a lista de accciones a realizar. Acciones permitas listar,compilar,publicar,peso
+    -s direccion del directorio donde se guardan las publicaciones
+ 
+
+    .EXAMPLE
+    ./ejercicio3.ps1 -c ./dir -a listar,compilar
+    ./ejercicio3.ps1 -c ./dir -a compilar,publicar -s ./publicado
+#>
+
 #CARGA DE PARAMETROS
 [cmdletbinding()]
 Param(
-    [Parameter(Mandatory=$true)]
-    [String[]]
-    [ValidateNotNullOrEmpty()]
-    $accion,
-    [Parameter(Mandatory = $true,
-        ValueFromPipeline = $true,
-        HelpMessage = "Path to the file or files to process.")]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $directorio,
-    [Parameter(Mandatory = $false,
-        ValueFromPipeline = $true,
-        HelpMessage = "Path to the file or files to process.")]
-    [Alias("PSPath")]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $publish
+    [Parameter(ParameterSetName = "ejecucion")]
+    $c,
+    [Parameter(ParameterSetName = "ejecucion")]
+    $a
+   # [Parameter(ParameterSetName = "ejecucion")]
+  #  $s
+)   
+ 
 
-)
+#VALIDAR
 
-$acciones = @($accion -split ",")
+$c = Resolve-Path $c 
+#CREAR DEMONIO
+# find the path to the desktop folder:
 
-#VALIDACIONES
+# specify the path to the folder you want to monitor:
+$Path = $c
 
-if ($null -eq $accion) {
-    Write-Error "Debe indicar una accion"
-    exit 1
+# specify which files you want to monitor
+$FileFilter = '*'  
+
+# specify whether you want to monitor subfolders as well:
+$IncludeSubfolders = $true
+
+# specify the file or folder properties you want to monitor:
+$AttributeFilter = [IO.NotifyFilters]::FileName, [IO.NotifyFilters]::LastWrite 
+
+# specify the type of changes you want to monitor:
+$ChangeTypes = [System.IO.WatcherChangeTypes]::Created, [System.IO.WatcherChangeTypes]::Deleted, [System.IO.WatcherChangeTypes]::Changed,  [System.IO.WatcherChangeTypes]::Renamed
+
+# specify the maximum time (in milliseconds) you want to wait for changes:
+$Timeout = 1000
+
+# define a function that gets called for every change:
+function Invoke-SomeAction
+{
+  param
+  (
+    [Parameter(Mandatory)]
+    [System.IO.WaitForChangedResult]
+    $ChangeInformation
+  )
+  
+  Write-Warning 'Change detected:'
+  $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
+
+
 }
 
-if ($null -eq $directorio) {
-    Write-Error "Debe indicar un directorio"
-    exit 1
+# use a try...finally construct to release the
+# filesystemwatcher once the loop is aborted
+# by pressing CTRL+C
+
+try
+{
+  Write-Warning "FileSystemWatcher is monitoring $Path"
+  
+  # create a filesystemwatcher object
+  $watcher = New-Object -TypeName IO.FileSystemWatcher -ArgumentList $Path, $FileFilter -Property @{
+    IncludeSubdirectories = $IncludeSubfolders
+    NotifyFilter = $AttributeFilter
+  }
+
+  # start monitoring manually in a loop:
+  do
+  {
+    # wait for changes for the specified timeout
+    # IMPORTANT: while the watcher is active, PowerShell cannot be stopped
+    # so it is recommended to use a timeout of 1000ms and repeat the
+    # monitoring in a loop. This way, you have the chance to abort the
+    # script every second.
+    $result = $watcher.WaitForChanged($ChangeTypes, $Timeout)
+    # if there was a timeout, continue monitoring:
+    if ($result.TimedOut) { continue }
+    
+    Invoke-SomeAction -Change $result
+    # the loop runs forever until you hit CTRL+C    
+  } while ($true)
 }
-
-
-
-if(!($acciones.Contains("compilar")) -and $acciones.Contains("publicar")){
-    Write-Error "No se puede publicar sin compilar"
-    exit 1
+finally
+{
+  # release the watcher and free its memory:
+  $watcher.Dispose()
+  Write-Warning 'FileSystemWatcher removed.'
 }
-
-
-$existe = Test-Path "$directorio"
-if ($existe -ne $true ) {
-    Write-Error "La dirección del directorio no existe"
-    exit 1
-}
-
-if ($acciones.Contains("publish")  -and $null -eq $publish) {
-    Write-Error "Debe indicar un directorio de publicacion"
-    exit 1
-}
-
-$directorio = Resolve-Path $directorio
-#--------------------------------------------------------------------------
-
-#FUNCIONES
-
-Function Register-Watcher {
-    param ($folder,$publish)
-    $filter = "*.*" #all files
-    $watcher = New-Object IO.FileSystemWatcher $folder, $filter -Property @{ 
-        IncludeSubdirectories = $true
-        EnableRaisingEvents   = $true
-    }
-    $listarString = '
-    $name = $Event.SourceEventArgs.FullPath
-     Write-Host "The file $name"'
-    $listarString+= "`n"
-
-    $pesoString = '
-    $name = $Event.SourceEventArgs.FullPath
-    $size = (Get-Item $name).Length
-    Write-Host "The file $name has $size bytes"'
-    $listarString+= "`n"
-    $accionExecute= ''
-    $compilarString =
-    '$files = Get-ChildItem '+ $folder +' -Filter *
-    $content=""
-    foreach($file in $files){ 
-        $content += Get-Content $file}
-    $content | Out-File bin/compilado.o'
-    $compilarString+= "`n"
-    $compilarString+= "`n"
-
-    $publicarString =
-    '$filesPublicar = Get-ChildItem "bin" -Filter *
-    foreach($file in  $filesPublicar){
-            Copy-Item $file.FullName ' + $publish +
-    '}'
-    $publicarString+= "`n"
-
-    foreach ($accion in $acciones)  {
-        if ($accion -eq "compilar") {
-            $CompilarBoolean  = $true
-        }
-        if ($accion -eq "publicar") {
-            $PublicarBoolean  = $true
-        }
-        if($accion -eq "listar"){
-            $ListarBoolean = $true
-        }
-        if($accion -eq "peso"){
-            $pesoBoolean = $true
-        }
-    }
-
-    if($CompilarBoolean){
-        $accionExecute += " " + $compilarString
-        $comp=[Scriptblock]::Create($compilarString)
-        &$comp
-    }
-    if($PublicarBoolean){
-        $accionExecute += " " + $publicarString
-        $publ=[Scriptblock]::Create($publicarString)
-        &$publ
-    }
-    if($ListarBoolean){
-        $accionExecute += " " + $listarString
-    }
-    if($pesoBoolean){
-        $accionExecute += $pesoString
-    }
-    Write-Host $accionExecute
-    $accionExecute = [Scriptblock]::Create($accionExecute)
-    Register-ObjectEvent $Watcher -EventName "Changed" -Action $accionExecute 
-    Register-ObjectEvent $Watcher -EventName "Created" -Action $accionExecute
-    Register-ObjectEvent $Watcher -EventName "Deleted" -Action $accionExecute
-    Register-ObjectEvent $Watcher -EventName "Renamed" -Action $accionExecute   
-}
-
-Register-Watcher -folder $directorio -publish $publish
-exit 0
