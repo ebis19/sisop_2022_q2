@@ -158,10 +158,15 @@ conteo() {
 			then
 				tipoComentario=$COMENTARIO_ABIERTO
 			fi
+		elif [[ -z "$linea" ]]
+		then
+                	(( cantLineas-- ))
+                	(( cantLineasTotales-- ))
 		fi
         #COMENTARIOS ABIERTOS   Ej. /*
-        else
-                (( comentario++ ))
+        elif [[ $tipoComentario == $COMENTARIO_ABIERTO ]]
+	then
+         	(( comentario++ ))
 		(( comentariosTotales++ ))
 
                 if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE || $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
@@ -174,7 +179,8 @@ conteo() {
 			(( codigoaEntreComentario++ ))
                         (( codigoaEntreComentarioTotal++ ))
                 fi
-        fi
+	fi
+
 }
 
 responsePorFichero() {
