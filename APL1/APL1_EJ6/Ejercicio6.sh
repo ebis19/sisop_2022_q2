@@ -103,15 +103,15 @@ recuperar(){
         nombreArchivo=${nombre% (copia*}    # mejora para archivo mismo nombre, mismo directorio
         if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
         then
-	   (( contadorArchivosIguales++ ))
-	    rutaArchivoUnico="$archivo"
-           if [ "$contadorArchivosIguales" -lt 1 ]
-	   then
-		break;
-	   fi
-	fi
+	        (( contadorArchivosIguales++ ))
+	        rutaArchivoUnico="$archivo"
+            if [ "$contadorArchivosIguales" -lt 1 ]
+	        then
+		        break;
+	        fi
+	    fi
     done
-    #echo "cantidad: $contadorArchivosIguales"
+    
     if [ "$contadorArchivosIguales" -eq 0 ];
     then
         echo "No existe el archivo en la papelera"
@@ -119,32 +119,34 @@ recuperar(){
     else
         if [ "$contadorArchivosIguales" -eq 1 ];	#Archivo unico
         then
-            tar -Pxvf "$papelera" "$rutaArchivoUnico" 1> /dev/null
+            rutaArchivo=$(dirname "$rutaArchivoUnico")
+            nombre=$(basename "$rutaArchivoUnico")
+            nombreArchivo=${nombre% (*}
+            archivoFinal="${rutaArchivo}/${nombreArchivo}"
+            tar -Pxvf "$papelera" "$rutaArchivoUnico" -O > "$archivoFinal" 1> /dev/null
             tar -Pvf "$papelera" --delete "$rutaArchivoUnico" 1> /dev/null
         else
 		#Mas de un archivo con el mismo nombre
 
-	   contadorArchivosIguales=0
-	   archivosIguales=0
-	   archivosIguales=""
-           IFS=$'\n'
-   	   for archivo in $(realpath $(tar -Ptf "$papelera"))
-    	   do
-        		rutaArchivo=$(dirname "$archivo")
-        		nombre=$(basename "$archivo")
+	        contadorArchivosIguales=0
+	        archivosIguales=0
+	        archivosIguales=""
+            IFS=$'\n'
+   	        for archivo in $(realpath $(tar -Ptf "$papelera"))
+    	    do
+                rutaArchivo=$(dirname "$archivo")
+            	nombre=$(basename "$archivo")
                 nombreArchivo=${nombre% (copia*}    # mejora para archivo mismo nombre, mismo directorio
-                #echo "rutaArchivo: $rutaArchivo"
-                #echo "nombreArchivo: $nombreArchivo"
-        	if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
-        	then
-            		let contadorArchivosIguales=contadorArchivosIguales+1
-            		#archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
-                    archivosIguales="$archivosIguales$contadorArchivosIguales - $nombre $rutaArchivo;"
-            		arrayArchivos[$contadorArchivosIguales]="$archivo"
-        	fi
-   	    done
+                
+            	if [ "$nombreArchivo" == "$archivoParaRecuperar" ];
+            	then
+                	let contadorArchivosIguales=contadorArchivosIguales+1
+                	archivosIguales="$archivosIguales$contadorArchivosIguales - $nombre $rutaArchivo;"
+                	arrayArchivos[$contadorArchivosIguales]="$archivo"
+            	fi
+   	        done
 
-	    echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
+	        echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
             echo "¿Qué archivo desea recuperar?"
             read opcion
 
@@ -169,7 +171,11 @@ recuperar(){
                 let indice=$indice+1
                 if [ "$indice" == "$elementoNumero" ];
                 then
-                    tar -Pxvf "$papelera" "$archivo" 1> /dev/null
+                    rutaArchivo=$(dirname "$archivo")
+                    nombre=$(basename "$archivo")
+                    nombreArchivo=${nombre% (*}
+                    archivoFinal="${rutaArchivo}/${nombreArchivo}"
+                    tar -Pxvf "$papelera" "$archivo" -O > "$archivoFinal" 1> /dev/null
                     tar -Pvf "$papelera" --delete "$archivo" 1> /dev/null
                 fi
             done 
@@ -180,8 +186,11 @@ recuperar(){
 
 vaciar(){
     papelera="${HOME}/papelera.zip"
-    rm "$papelera"
-    tar -Pcf "$papelera" --files-from /dev/null
+    if [ -f "$papelera" ];
+    then
+        rm "$papelera"
+        tar -Pcf "$papelera" --files-from /dev/null
+    fi
     echo "Se elimino definitivamente todos los archivos"
 }
 
@@ -196,55 +205,52 @@ eliminar(){
         exit 1
     fi
 
-    #-------------------------------------------------------------------------------
-    # Se valida si hay archivo con mismo nombre y mismo directorio
-    contadorArchivosIguales=0
-    archivosIguales=""
-    declare -a arrayArchivos
+    if [ -f "$papelera" ];
+    then
+        #-------------------------------------------------------------------------------
+        # Se valida si hay archivo con mismo nombre y mismo directorio
+        contadorArchivosIguales=0
+        archivosIguales=""
+        declare -a arrayArchivos
 
-    IFS=$'\n'
-    for archivo in $(tar -Ptf "$papelera")
-    do
-        nombreArchivo=${archivo% (copia*}
-        if [ "$nombreArchivo" == "$archivoEliminar" ];
+        IFS=$'\n'
+        for archivo in $(tar -Ptf "$papelera")
+        do
+            nombreArchivo=${archivo% (copia*}
+            if [ "$nombreArchivo" == "$archivoEliminar" ];
+            then
+                (( contadorArchivosIguales++ ))
+                rutaArchivoUnico="$archivo"
+                if [ "$contadorArchivosIguales" -lt 1 ]
+                then
+                    break;
+                fi
+            fi
+        done
+
+        # renombrar archivo con numero de secuencia
+        if [ "$contadorArchivosIguales" -ne 0 ];
         then
-	        (( contadorArchivosIguales++ ))
-	        rutaArchivoUnico="$archivo"
-            if [ "$contadorArchivosIguales" -lt 1 ]
-	        then
-		        break;
-	        fi
-	    fi
-    done
-    #echo "eliminar-rutaArchivoUnico: $rutaArchivoUnico"
-
-    # renombrar archivo con numero de secuencia
-    if [ "$contadorArchivosIguales" -ne 0 ];
-    then
-        repetido="${archivo##*(copia }"
-        repetidosss=${repetido%)*}
-        validate_number='^-?[0-9]+([.][0-9]+)?$'
-        if ! [[ $repetidosss =~ $validate_number ]]; then
-            nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
-        
-        else 
-            (( repetidosss++ ))
-            nombreCopia="$archivoEliminar (copia $repetidosss)"
+            repetido="${archivo##*(copia }"
+            repetidosss=${repetido%)*}
+            validate_number='^-?[0-9]+([.][0-9]+)?$'
+            if ! [[ $repetidosss =~ $validate_number ]]; then
+                nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
+            
+            else 
+                (( repetidosss++ ))
+                nombreCopia="$archivoEliminar (copia $repetidosss)"
+            fi
+            echo `mv $archivoEliminar $nombreCopia`
+            archivoEliminar="$nombreCopia"
         fi
-        #nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
-        echo `mv $archivoEliminar $nombreCopia`
-        archivoEliminar="$nombreCopia"
-    fi
-    #-------------------------------------------------------------------------------
-
-    if [ ! -f "$papelera" ];
-    then
-        tar -Pcvf "$papelera" "$archivoEliminar" > /dev/null
-    else
+        #-------------------------------------------------------------------------------
         tar -Prvf "$papelera" "$archivoEliminar" > /dev/null
+    else
+        tar -Pcvf "$papelera" "$archivoEliminar" > /dev/null
     fi
     rm "$archivoEliminar"
-    echo "Archivo eliminado"
+    echo "Archivo eliminado"    
 }
 
 borrar(){
@@ -283,12 +289,11 @@ archivoParaBorrar="$1"
         then
             let contadorArchivosIguales=contadorArchivosIguales+1
             rutaArchivoUnico="$archivo"    # mejora
-            #archivosIguales="$archivosIguales$contadorArchivosIguales - $nombreArchivo $rutaArchivo;"
             archivosIguales="$archivosIguales$contadorArchivosIguales - $nombre $rutaArchivo;"
             arrayArchivos[$contadorArchivosIguales]="$archivo"
         fi
     done
-    echo "cantidad: $contadorArchivosIguales"
+    
     if [ "$contadorArchivosIguales" -eq 0 ];
     then
         echo "No existe el archivo en la papelera"
@@ -296,7 +301,8 @@ archivoParaBorrar="$1"
     else
         if [ "$contadorArchivosIguales" -eq 1 ];
         then   
-            tar -Pvf "$papelera" --delete "$rutaArchivoUnico" 1> /dev/null 
+            nombre=$(basename "$rutaArchivoUnico")
+            tar -Pvf "$papelera" --delete "$nombre" 1> /dev/null 
         else
             echo "$archivosIguales" | awk 'BEGIN{FS=";"} {for(i=1; i < NF; i++) print $i}'
             echo "¿Qué archivo desea borar?"
