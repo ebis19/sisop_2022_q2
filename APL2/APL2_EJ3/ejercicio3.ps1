@@ -49,13 +49,16 @@ $acciones = @($a -split ",")
 
 
 # define a function that gets called for every change:
-function ejercutar_accion
+function invoke_action
 {
   param
   (
     [Parameter(Mandatory)]
     [System.IO.WaitForChangedResult]
-    $ChangeInformation
+    $ChangeInformation,
+    [Parameter(Mandatory)]
+    [System.String]
+    $File
   )
   
   foreach ($accion in $acciones)  {
@@ -69,14 +72,11 @@ function ejercutar_accion
         $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
     }
     if($accion -eq "peso"){
-     # $name = $ChangeInformation::Size
-     # Write-Host $name
+      $size = (Get-Item $File).Length / 1Kb
+      Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
 
     }
-}
-
- 
-
+  }
 
 }
 
@@ -84,7 +84,7 @@ function ejercutar_accion
 # filesystemwatcher once the loop is aborted
 # by pressing CTRL+C
 
-function monitoreo {
+function waching {
 
   $c = Resolve-Path $c 
 
@@ -98,7 +98,7 @@ function monitoreo {
   $IncludeSubfolders = $true
 
   # specify the file or folder properties you want to monitor:
-  $AttributeFilter = [IO.NotifyFilters]::FileName, [IO.NotifyFilters]::LastWrite, [IO.NotifyFilters]::Size
+  $AttributeFilter =  [IO.NotifyFilters]::LastWrite
 
   # specify the type of changes you want to monitor:
   $ChangeTypes = [System.IO.WatcherChangeTypes]::Created, [System.IO.WatcherChangeTypes]::Deleted, [System.IO.WatcherChangeTypes]::Changed,  [System.IO.WatcherChangeTypes]::Renamed
@@ -116,6 +116,7 @@ function monitoreo {
       IncludeSubdirectories = $IncludeSubfolders
       NotifyFilter = $AttributeFilter
     }
+   
 
     # start monitoring manually in a loop:
     do
@@ -128,8 +129,12 @@ function monitoreo {
       $result = $watcher.WaitForChanged($ChangeTypes, $Timeout)
       # if there was a timeout, continue monitoring:
       if ($result.TimedOut) { continue }
+      $file = "$Path" + "/" + $result.Name
 
-      ejercutar_accion -Change $result
+      invoke_action -Change $result -File $file
+            
+      # $action.SourceEventArgs | Out-String
+      # $watcher | Get-Member -MemberType Property |Out-String #-MemberType Details 
       # the loop runs forever until you hit CTRL+C    
     } while ($true)
   }
@@ -141,5 +146,4 @@ function monitoreo {
   }
 }
 
-
-monitoreo
+waching
