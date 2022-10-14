@@ -1,15 +1,15 @@
 
 #-----------------------------------------------#
-# Nombre del Script: contadorcodigo.sh          #
+# Nombre del Script: ejercicio3.sh              #
 # APL 2                                         #
-# Ejercicio 4                                   #
+# Ejercicio 3                                   #
 # Integrantes:                                  #
 # Molina Lara                     DNI: 40187938 #
 # Lopez Julian                    DNI: 39712927 #
 # Gorbolino Tamara                DNI: 41668847 #
 # Biscaia Elias                   DNI: 40078823 #
 # Amelia Colque                   DNI: 34095247 #
-# Nro entrega: 1                                #
+# Reentrega: 1                                  #
 #-----------------------------------------------#
 
 <#
@@ -32,25 +32,24 @@
 #CARGA DE PARAMETROS
 [cmdletbinding()]
 Param(
-    [Parameter(ParameterSetName = "ejecucion")]
-    $c,
-    [Parameter(ParameterSetName = "ejecucion")]
-    $a,
-    [Parameter(ParameterSetName = "ejecucion")]
-    $salida
+  [Parameter(ParameterSetName = "ejecucion")]
+  $codigo,
+  [Parameter(ParameterSetName = "ejecucion")]
+  $acciones,
+  [Parameter(ParameterSetName = "ejecucion")]
+  $salida
 )   
  
 
 #VALIDAR
 
-$acciones = @($a -split ",")
+$actions = @($acciones -split ",")
 
 #-----------------------------------------
 
 
 # define a function that gets called for every change:
-function invoke_action
-{
+function invoke_action {
   param
   (
     [Parameter(Mandatory)]
@@ -58,15 +57,30 @@ function invoke_action
     $ChangeInformation,
     [Parameter(Mandatory)]
     [System.String]
-    $File
+    $File,
+    [Parameter(Mandatory)]
+    [System.String]
+    $Path
   )
   
-  foreach ($accion in $acciones)  {
+  foreach ($accion in $acciones) {
     if ($accion -eq "compilar") {
-        "compilar"
+      $rutaScript = Get-Location
+      $rutaBin = "$rutaScript\bin"
+      $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+      if (-not (Test-Path $rutaBin)) {
+        New-Item $rutaBin -itemType Directory
+      }
+            
+      foreach ( $item in Get-ChildItem $Path ) {
+        Write-Host $item
+        Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+      }
     }
     if ($accion -eq "publicar") {
       #SI EL DIRECTORIO NO EXISTE LO CREA
+      
       if (-not (Test-Path $salida)){
         New-Item $salida -Type Directory
       }
@@ -78,13 +92,14 @@ function invoke_action
       }
       
     }
-    if($accion -eq "listar"){
-        $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
+    if ($accion -eq "listar") {
+      $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
     }
-    if($accion -eq "peso"){
-      $size = (Get-Item $File).Length / 1Kb
-      Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
-
+    if ($action -eq "peso") {
+      if ([System.IO.File]::Exists($File)) {
+        $size = (Get-Item $File).Length / 1Kb
+        Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
+      }
     }
   }
 
@@ -96,10 +111,10 @@ function invoke_action
 
 function waching {
 
-  $c = Resolve-Path $c 
+  $codigo = Resolve-Path $codigo
 
   # specify the path to the folder you want to monitor:
-  $Path = $c
+  $Path = $codigo
 
   # specify which files you want to monitor
   $FileFilter = '*'  
@@ -108,29 +123,26 @@ function waching {
   $IncludeSubfolders = $true
 
   # specify the file or folder properties you want to monitor:
-  $AttributeFilter =  [IO.NotifyFilters]::LastWrite
+  $AttributeFilter = [IO.NotifyFilters]::FileName, [IO.NotifyFilters]::LastWrite 
 
   # specify the type of changes you want to monitor:
-  $ChangeTypes = [System.IO.WatcherChangeTypes]::Created, [System.IO.WatcherChangeTypes]::Deleted, [System.IO.WatcherChangeTypes]::Changed,  [System.IO.WatcherChangeTypes]::Renamed
+  $ChangeTypes = [System.IO.WatcherChangeTypes]::Created, [System.IO.WatcherChangeTypes]::Deleted, [System.IO.WatcherChangeTypes]::Changed, [System.IO.WatcherChangeTypes]::Renamed
 
   # specify the maximum time (in milliseconds) you want to wait for changes:
   $Timeout = 1000
 
 
-  try
-  {
+  try {
     Write-Warning "Se inicio el monitoreo de $Path"
 
     # create a filesystemwatcher object
     $watcher = New-Object -TypeName IO.FileSystemWatcher -ArgumentList $Path, $FileFilter -Property @{
       IncludeSubdirectories = $IncludeSubfolders
-      NotifyFilter = $AttributeFilter
+      NotifyFilter          = $AttributeFilter
     }
-   
 
     # start monitoring manually in a loop:
-    do
-    {
+    do {
       # wait for changes for the specified timeout
       # IMPORTANT: while the watcher is active, PowerShell cannot be stopped
       # so it is recommended to use a timeout of 1000ms and repeat the
@@ -141,15 +153,14 @@ function waching {
       if ($result.TimedOut) { continue }
       $file = "$Path" + "/" + $result.Name
 
-      invoke_action -Change $result -File $file
+      invoke_action -Change $result -File $file -Path $Path
             
       # $action.SourceEventArgs | Out-String
       # $watcher | Get-Member -MemberType Property |Out-String #-MemberType Details 
       # the loop runs forever until you hit CTRL+C    
     } while ($true)
   }
-  finally
-  {
+  finally {
     # release the watcher and free its memory:
     $watcher.Dispose()
     Write-Warning 'Fin del monitoreo'
