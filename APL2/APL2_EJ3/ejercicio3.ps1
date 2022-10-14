@@ -66,8 +66,8 @@ function invoke_action {
   foreach ($accion in $acciones) {
     if ($accion -eq "compilar") {
       $rutaScript = Get-Location
-      $rutaBin = "$rutaScript\Bin"
-      $rutaCompilado = "$rutaScript\Bin\compilado.txt" 
+      $rutaBin = "$rutaScript\bin"
+      $rutaCompilado = "$rutaScript\bin\compilado.o" 
 
       if (-not (Test-Path $rutaBin)) {
         New-Item $rutaBin -itemType Directory
