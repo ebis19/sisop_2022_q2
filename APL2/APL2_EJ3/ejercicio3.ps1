@@ -35,9 +35,9 @@ Param(
     [Parameter(ParameterSetName = "ejecucion")]
     $c,
     [Parameter(ParameterSetName = "ejecucion")]
-    $a
-   # [Parameter(ParameterSetName = "ejecucion")]
-  #  $s
+    $a,
+    [Parameter(ParameterSetName = "ejecucion")]
+    $salida
 )   
  
 
@@ -66,7 +66,17 @@ function invoke_action
         "compilar"
     }
     if ($accion -eq "publicar") {
-       "publicar"
+      #SI EL DIRECTORIO NO EXISTE LO CREA
+      if (-not (Test-Path $salida)){
+        New-Item $salida -Type Directory
+      }
+
+      #PREGUNTA SI EL ARCHIVO BIN GENERADO POR COMPILAR EXISTE
+      $rutaOrigen =  Resolve-Path "bin/compilado.o"
+      if([System.IO.File]::Exists($rutaOrigen)){
+        Copy-Item -Path $rutaOrigen -Destination $salida ##-Recurse -Force -Passthru
+      }
+      
     }
     if($accion -eq "listar"){
         $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
