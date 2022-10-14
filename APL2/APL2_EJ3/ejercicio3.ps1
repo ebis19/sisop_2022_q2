@@ -1,15 +1,15 @@
 
 #-----------------------------------------------#
-# Nombre del Script: contadorcodigo.sh          #
+# Nombre del Script: ejercicio3.sh              #
 # APL 2                                         #
-# Ejercicio 4                                   #
+# Ejercicio 3                                   #
 # Integrantes:                                  #
 # Molina Lara                     DNI: 40187938 #
 # Lopez Julian                    DNI: 39712927 #
 # Gorbolino Tamara                DNI: 41668847 #
 # Biscaia Elias                   DNI: 40078823 #
 # Amelia Colque                   DNI: 34095247 #
-# Nro entrega: 1                                #
+# Reentrega: 1                                  #
 #-----------------------------------------------#
 
 <#
@@ -33,9 +33,9 @@
 [cmdletbinding()]
 Param(
   [Parameter(ParameterSetName = "ejecucion")]
-  $c,
+  $codigo,
   [Parameter(ParameterSetName = "ejecucion")]
-  $a
+  $acciones
   # [Parameter(ParameterSetName = "ejecucion")]
   #  $s
 )   
@@ -43,7 +43,7 @@ Param(
 
 #VALIDAR
 
-$acciones = @($a -split ",")
+$actions = @($acciones -split ",")
 
 #-----------------------------------------
 
@@ -84,10 +84,11 @@ function invoke_action {
     if ($accion -eq "listar") {
       $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
     }
-    if ($accion -eq "peso") {
-      $size = (Get-Item $File).Length / 1Kb
-      Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
-
+    if ($action -eq "peso") {
+      if ([System.IO.File]::Exists($File)) {
+        $size = (Get-Item $File).Length / 1Kb
+        Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
+      }
     }
   }
 
@@ -99,10 +100,10 @@ function invoke_action {
 
 function waching {
 
-  $c = Resolve-Path $c 
+  $codigo = Resolve-Path $codigo
 
   # specify the path to the folder you want to monitor:
-  $Path = $c
+  $Path = $codigo
 
   # specify which files you want to monitor
   $FileFilter = '*'  
@@ -111,7 +112,7 @@ function waching {
   $IncludeSubfolders = $true
 
   # specify the file or folder properties you want to monitor:
-  $AttributeFilter = [IO.NotifyFilters]::LastWrite
+  $AttributeFilter = [IO.NotifyFilters]::FileName, [IO.NotifyFilters]::LastWrite 
 
   # specify the type of changes you want to monitor:
   $ChangeTypes = [System.IO.WatcherChangeTypes]::Created, [System.IO.WatcherChangeTypes]::Deleted, [System.IO.WatcherChangeTypes]::Changed, [System.IO.WatcherChangeTypes]::Renamed
@@ -128,7 +129,6 @@ function waching {
       IncludeSubdirectories = $IncludeSubfolders
       NotifyFilter          = $AttributeFilter
     }
-   
 
     # start monitoring manually in a loop:
     do {
