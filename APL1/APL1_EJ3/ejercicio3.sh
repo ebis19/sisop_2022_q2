@@ -324,6 +324,16 @@ then
      exit 1
 fi
 
+#SI esta compilar y publicar ejecuto las acciones antes del demonio
+if [[ $isCompilar == 1 ]]
+then
+	compilar
+fi
+if [[ $isPublicar == 1 ]]
+then
+        publicar
+fi
+
 monitorear
 
 
