@@ -166,10 +166,13 @@ recuperar(){
             IFS=$'\n'
             for archivo in $(tar -Ptf "$papelera" ) 
             do  
+
                 let indice=$indice+1
                 if [ "$indice" == "$elementoNumero" ];
                 then
-                    tar -Pxvf "$papelera" "$archivo" 1> /dev/null
+                    nombre=$(basename "$archivo")
+                    nombreArchivo=${nombre% (*} 
+                    tar -Pxvf "$papelera" "$archivo" -O > "$nombreArchivo" 1> /dev/null
                     tar -Pvf "$papelera" --delete "$archivo" 1> /dev/null
                 fi
             done 
@@ -207,9 +210,7 @@ eliminar(){
         IFS=$'\n'
         for archivo in $(tar -Ptf "$papelera")
         do
-            echo "$archivo"
             nombreArchivo=${archivo% (copia*}
-            echo "nombre de archivo: $nombreArchivo"
             if [ "$nombreArchivo" == "$archivoEliminar" ];
             then
                 (( contadorArchivosIguales++ ))
