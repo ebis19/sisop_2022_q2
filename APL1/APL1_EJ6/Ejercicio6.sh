@@ -196,55 +196,56 @@ eliminar(){
         exit 1
     fi
 
-    #-------------------------------------------------------------------------------
-    # Se valida si hay archivo con mismo nombre y mismo directorio
-    contadorArchivosIguales=0
-    archivosIguales=""
-    declare -a arrayArchivos
+    if [ -f "$papelera" ];
+    then
+        #-------------------------------------------------------------------------------
+        # Se valida si hay archivo con mismo nombre y mismo directorio
+        contadorArchivosIguales=0
+        archivosIguales=""
+        declare -a arrayArchivos
 
-    IFS=$'\n'
-    for archivo in $(tar -Ptf "$papelera")
-    do
-        nombreArchivo=${archivo% (copia*}
-        if [ "$nombreArchivo" == "$archivoEliminar" ];
+        IFS=$'\n'
+        for archivo in $(tar -Ptf "$papelera")
+        do
+            echo "$archivo"
+            nombreArchivo=${archivo% (copia*}
+            echo "nombre de archivo: $nombreArchivo"
+            if [ "$nombreArchivo" == "$archivoEliminar" ];
+            then
+                (( contadorArchivosIguales++ ))
+                rutaArchivoUnico="$archivo"
+                if [ "$contadorArchivosIguales" -lt 1 ]
+                then
+                    break;
+                fi
+            fi
+        done
+        #echo "eliminar-rutaArchivoUnico: $rutaArchivoUnico"
+
+        # renombrar archivo con numero de secuencia
+        if [ "$contadorArchivosIguales" -ne 0 ];
         then
-	        (( contadorArchivosIguales++ ))
-	        rutaArchivoUnico="$archivo"
-            if [ "$contadorArchivosIguales" -lt 1 ]
-	        then
-		        break;
-	        fi
-	    fi
-    done
-    #echo "eliminar-rutaArchivoUnico: $rutaArchivoUnico"
-
-    # renombrar archivo con numero de secuencia
-    if [ "$contadorArchivosIguales" -ne 0 ];
-    then
-        repetido="${archivo##*(copia }"
-        repetidosss=${repetido%)*}
-        validate_number='^-?[0-9]+([.][0-9]+)?$'
-        if ! [[ $repetidosss =~ $validate_number ]]; then
-            nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
-        
-        else 
-            (( repetidosss++ ))
-            nombreCopia="$archivoEliminar (copia $repetidosss)"
+            repetido="${archivo##*(copia }"
+            repetidosss=${repetido%)*}
+            validate_number='^-?[0-9]+([.][0-9]+)?$'
+            if ! [[ $repetidosss =~ $validate_number ]]; then
+                nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
+            
+            else 
+                (( repetidosss++ ))
+                nombreCopia="$archivoEliminar (copia $repetidosss)"
+            fi
+            #nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
+            echo `mv $archivoEliminar $nombreCopia`
+            archivoEliminar="$nombreCopia"
         fi
-        #nombreCopia="$archivoEliminar (copia $contadorArchivosIguales)"
-        echo `mv $archivoEliminar $nombreCopia`
-        archivoEliminar="$nombreCopia"
-    fi
-    #-------------------------------------------------------------------------------
-
-    if [ ! -f "$papelera" ];
-    then
-        tar -Pcvf "$papelera" "$archivoEliminar" > /dev/null
-    else
+        #-------------------------------------------------------------------------------
         tar -Prvf "$papelera" "$archivoEliminar" > /dev/null
+    else
+        tar -Pcvf "$papelera" "$archivoEliminar" > /dev/null
     fi
     rm "$archivoEliminar"
-    echo "Archivo eliminado"
+    echo "Archivo eliminado"    
 }
 
 borrar(){
