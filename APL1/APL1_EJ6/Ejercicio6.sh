@@ -170,9 +170,11 @@ recuperar(){
                 let indice=$indice+1
                 if [ "$indice" == "$elementoNumero" ];
                 then
+                    rutaArchivo=$(dirname "$archivo")
                     nombre=$(basename "$archivo")
-                    nombreArchivo=${nombre% (*} 
-                    tar -Pxvf "$papelera" "$archivo" -O > "$nombreArchivo" 1> /dev/null
+                    nombreArchivo=${nombre% (*}
+                    archivoFinal="${rutaArchivo}/${nombreArchivo}"
+                    tar -Pxvf "$papelera" "$archivo" -O > "$archivoFinal" 1> /dev/null
                     tar -Pvf "$papelera" --delete "$archivo" 1> /dev/null
                 fi
             done 
