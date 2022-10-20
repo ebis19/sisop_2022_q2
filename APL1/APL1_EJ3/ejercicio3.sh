@@ -193,7 +193,7 @@ generarNombreArchivo(){
 }
 
 monitorear(){
-	inotifywait -m -e modify,delete,create,move "$ruta_monitoreo" --format "%w%f,%e" | while read file; do
+	inotifywait -m -q -e modify,delete,create,move "$ruta_monitoreo" --format "%w%f,%e" | while read file; do
 	IFS=',' read -ra var <<< "$file"
         file_name=${var[0]}
         event=${var[1]}
@@ -231,7 +231,7 @@ monitorear(){
         		fi
 		done
 
-	done
+	done &
 
 }
 
