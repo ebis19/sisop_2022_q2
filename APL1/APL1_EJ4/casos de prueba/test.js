@@ -9,4 +9,4 @@ soy comentario multiple
 */
 soy codigo
 //soy un comentario simple
-//codigo = 5 comentarios = 7
+//codigo = 5 -> 42% comentarios = 7 -> 58%

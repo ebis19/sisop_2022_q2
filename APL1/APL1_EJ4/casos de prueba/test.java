@@ -8,4 +8,4 @@ comentario
 codigo;
 codigo;
 
-//codigo = 3 comentarios = 6
+//codigo = 3 -> 27% comentarios = 6 -> 54%
