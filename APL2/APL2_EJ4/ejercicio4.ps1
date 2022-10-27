@@ -1,18 +1,24 @@
 <#
  .SYNOPSIS
   Permite contar la cantidad de líneas de código y de comentarios que poseen los archivos en una ruta pasada por parámetro y controlando solo los archivos con cierta extensión
- .DESCRIPTION
+
+  .DESCRIPTION
   Acciones que puede realizar: 
   • Informar la cantidad de Archvivos analizados
   • Informar la cantidad de lineas de codigo de los archivos junto a su porcentaje
   • Informar la cantidad de lineas de comentarios de los archivos junto a su porcentaje 
- 
+
+  PARAMETROS:
+  -ruta         Se envia la ruta de la carpeta para analizar
+  -ext          Se envian las extensiones de los archivos a analizar 
+
  .EXAMPLE
- .\ejercicio4.ps1 -ruta ./pruebas -ext js,css,php
+ 
+ .\ejercicio4.ps1 -ruta ./pruebas -ext js,css,php,java
+ .\ejercicio4.ps1 -ruta ./pruebas -ext js,java
+ .\ejercicio4.ps1 -ruta ./pruebas -ext css
 
 #>
-
-
 
 #-----------------------------------------------#
 # Nombre del Script: contadorcodigo.sh          #
@@ -82,7 +88,7 @@ foreach ($filename in $(Get-ChildItem -Path ./"$ruta" | % { $_.Name })) {
     
     foreach ($extension in $ext) {
         if ($filename.EndsWith(".$extension")) {#valido la extension del archivo
-            
+
             $cantidadFicheros++
 
             $archivo = Get-Content "$ruta/$filename"   
@@ -128,7 +134,7 @@ foreach ($filename in $(Get-ChildItem -Path ./"$ruta" | % { $_.Name })) {
                         }
                     }
                     #COMENTARIO DE TIPO ...//....
-                    elseif ("$linea" -eq "*$COMENTARIOSIMPLE*") {
+                    elseif ($linea.Contains($COMENTARIOSIMPLE)) {
                         #suma comentario
                         $comentarios++
                         
