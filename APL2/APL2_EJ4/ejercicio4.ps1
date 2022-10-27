@@ -89,6 +89,12 @@ foreach ($filename in $(Get-ChildItem -Path ./"$ruta" | % { $_.Name })) {
         
             foreach ($linea in $archivo) {
                 $cantidadLineas++
+                if($null -eq $linea -or "" -eq $linea) {
+                    if($tipoComentario -eq $COMENTARIO_ABIERTO) {
+                        $comentarios++
+                    }
+                    continue
+                }
 
                 $comienzoDeLinea = $linea.Substring(0, 2)
 
@@ -186,7 +192,7 @@ if($cantidadLineasTotales -eq 0)
 }
 
 [int]$porcentajeCodigoTotal = $(($codigoTotal * 100 / $cantidadLineasTotales))
-$porcentajeComentarioTotal = $((100 - $porcentajeCodigoTotal))
+[int]$porcentajeComentarioTotal = $(($comentariosTotales * 100 / $cantidadLineasTotales))
 
 Write-Host "------------------------------------------------"
 Write-Host "Cantidad de archivos analizados: " $cantidadFicheros
