@@ -71,6 +71,8 @@ function invoke_action {
 
       if (-not (Test-Path $rutaBin)) {
         New-Item $rutaBin -itemType Directory
+      } elseif(Test-Path $rutaCompilado) {
+        Remove-Item $rutaCompilado 
       }
             
       foreach ( $item in Get-ChildItem $Path ) {
@@ -95,7 +97,7 @@ function invoke_action {
     if ($accion -eq "listar") {
       $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
     }
-    if ($action -eq "peso") {
+    if ($accion -eq "peso") {
       if ([System.IO.File]::Exists($File)) {
         $size = (Get-Item $File).Length / 1Kb
         Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
@@ -160,6 +162,46 @@ function waching {
       # the loop runs forever until you hit CTRL+C    
     } while ($true)
   
+}
+
+
+$codigo = Resolve-Path $codigo
+
+# specify the path to the folder you want to monitor:
+$Path = $codigo
+
+foreach ($accion in $acciones) {
+  if ($accion -eq "compilar") {
+    $rutaScript = Get-Location
+    $rutaBin = "$rutaScript\bin"
+    $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+    if (-not (Test-Path $rutaBin)) {
+      New-Item $rutaBin -itemType Directory
+    }
+    elseif(Test-Path $rutaCompilado) {
+        Remove-Item $rutaCompilado 
+    }
+          
+    foreach ( $item in Get-ChildItem $Path ) {
+      Write-Host $item
+      Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+    }
+  }
+  elseif ($accion -eq "publicar") {
+    #SI EL DIRECTORIO NO EXISTE LO CREA
+    
+    if (-not (Test-Path $salida)){
+      New-Item $salida -Type Directory
+    }
+
+    #PREGUNTA SI EL ARCHIVO BIN GENERADO POR COMPILAR EXISTE
+    $rutaOrigen =  Resolve-Path "bin/compilado.o"
+    if([System.IO.File]::Exists($rutaOrigen)){
+      Copy-Item -Path $rutaOrigen -Destination $salida ##-Recurse -Force -Passthru
+    }
+    
+  }
 }
 
 waching
