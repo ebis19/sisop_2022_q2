@@ -63,8 +63,12 @@ function invoke_action {
     $Path
   )
   
+  $compilado = $FALSE;
+
   foreach ($accion in $acciones) {
-    if ($accion -eq "compilar") {
+    if ($accion -eq "compilar" && $compilado -eq $FALSE) {
+      $compilado = $TRUE
+
       $rutaScript = Get-Location
       $rutaBin = "$rutaScript\bin"
       $rutaCompilado = "$rutaScript\bin\compilado.o" 
@@ -76,12 +80,31 @@ function invoke_action {
       }
             
       foreach ( $item in Get-ChildItem $Path ) {
-        Write-Host $item
         Get-Content $item.FullName | Add-Content -Path $rutaCompilado
       }
     }
     if ($accion -eq "publicar") {
       #SI EL DIRECTORIO NO EXISTE LO CREA
+
+      if($compilado -eq $FALSE){
+
+        #COMPILA
+        $compilado = $TRUE
+
+        $rutaScript = Get-Location
+        $rutaBin = "$rutaScript\bin"
+        $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+        if (-not (Test-Path $rutaBin)) {
+          New-Item $rutaBin -itemType Directory
+        } elseif(Test-Path $rutaCompilado) {
+          Remove-Item $rutaCompilado 
+        }
+            
+        foreach ( $item in Get-ChildItem $Path ) {
+          Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+        }
+      }
       
       if (-not (Test-Path $salida)){
         New-Item $salida -Type Directory
@@ -133,10 +156,6 @@ function waching {
   # specify the maximum time (in milliseconds) you want to wait for changes:
   $Timeout = 1000
 
-
-
-    Write-Warning "Se inicio el monitoreo de $Path"
-
     # create a filesystemwatcher object
     $watcher = New-Object -TypeName IO.FileSystemWatcher -ArgumentList $Path, $FileFilter -Property @{
       IncludeSubdirectories = $IncludeSubfolders
@@ -170,26 +189,49 @@ $codigo = Resolve-Path $codigo
 # specify the path to the folder you want to monitor:
 $Path = $codigo
 
+$compilado = $FALSE
+
+
 foreach ($accion in $acciones) {
-  if ($accion -eq "compilar") {
+  if ($accion -eq "compilar" && $compilado -eq $FALSE) {
+    $compilado = $TRUE
+
     $rutaScript = Get-Location
     $rutaBin = "$rutaScript\bin"
     $rutaCompilado = "$rutaScript\bin\compilado.o" 
 
     if (-not (Test-Path $rutaBin)) {
       New-Item $rutaBin -itemType Directory
-    }
-    elseif(Test-Path $rutaCompilado) {
-        Remove-Item $rutaCompilado 
+    } elseif(Test-Path $rutaCompilado) {
+      Remove-Item $rutaCompilado 
     }
           
     foreach ( $item in Get-ChildItem $Path ) {
-      Write-Host $item
       Get-Content $item.FullName | Add-Content -Path $rutaCompilado
     }
   }
-  elseif ($accion -eq "publicar") {
+  if ($accion -eq "publicar") {
     #SI EL DIRECTORIO NO EXISTE LO CREA
+
+    if($compilado -eq $FALSE){
+
+      #COMPILA
+      $compilado = $TRUE
+
+      $rutaScript = Get-Location
+      $rutaBin = "$rutaScript\bin"
+      $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+      if (-not (Test-Path $rutaBin)) {
+        New-Item $rutaBin -itemType Directory
+      } elseif(Test-Path $rutaCompilado) {
+        Remove-Item $rutaCompilado 
+      }
+          
+      foreach ( $item in Get-ChildItem $Path ) {
+        Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+      }
+    }
     
     if (-not (Test-Path $salida)){
       New-Item $salida -Type Directory
