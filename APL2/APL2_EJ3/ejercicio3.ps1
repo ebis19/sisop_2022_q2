@@ -132,7 +132,7 @@ function waching {
   $Timeout = 1000
 
 
-  try {
+
     Write-Warning "Se inicio el monitoreo de $Path"
 
     # create a filesystemwatcher object
@@ -159,12 +159,7 @@ function waching {
       # $watcher | Get-Member -MemberType Property |Out-String #-MemberType Details 
       # the loop runs forever until you hit CTRL+C    
     } while ($true)
-  }
-  finally {
-    # release the watcher and free its memory:
-    $watcher.Dispose()
-    Write-Warning 'Fin del monitoreo'
-  }
+  
 }
 
 waching
