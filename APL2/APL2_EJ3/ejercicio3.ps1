@@ -19,20 +19,20 @@
     .DESCRIPTION
     
     Parametros de entrada
-    -c direccion del directorio que contiene los archivos a monitoriar
-    -a lista de accciones a realizar. Acciones permitas listar,compilar,publicar,peso
-    -s direccion del directorio donde se guardan las publicaciones
+    -codigo direccion del directorio que contiene los archivos a monitoriar
+    -acciones lista de accciones a realizar. Acciones permitas listar,compilar,publicar,peso
+    -salida direccion del directorio donde se guardan las publicaciones
  
 
     .EXAMPLE
-    ./ejercicio3.ps1 -c ./dir -a listar,compilar
-    ./ejercicio3.ps1 -c ./dir -a compilar,publicar -s ./publicado
+    ./ejercicio3.ps1 -codigo ./dir -acciones listar,compilar
+    ./ejercicio3.ps1 -codigo ./dir -acciones compilar,publicar -salida ./publicado
 #>
 
 #CARGA DE PARAMETROS
 [cmdletbinding()]
 Param(
-  [Parameter(ParameterSetName = "ejecucion")]
+  [Parameter(ParameterSetName = "ejecucion",Mandatory=$True)]
   $codigo,
   [Parameter(ParameterSetName = "ejecucion")]
   $acciones,
@@ -41,9 +41,41 @@ Param(
 )   
  
 
+
+
 #VALIDAR
 
+if($acciones -eq $null) {
+  Write-Host "Debe ingresar accioes"
+  exit 1
+}
+
 $actions = @($acciones -split ",")
+
+$ACCION_PUBLICAR = $FALSE 
+$ACCION_COMPILAR = $FALSE
+
+foreach ($accion in $acciones) {
+  if($accion -eq "publicar") {
+    $ACCION_PUBLICAR = $TRUE
+  }
+  if($accion -eq "compilar") {
+    $ACCION_COMPILAR = $TRUE
+  }
+}
+
+if($ACCION_PUBLICAR -eq $TRUE){
+  if($ACCION_COMPILAR -eq $FALSE){
+    Write-Host "No se puede usar la accion publicar sin la accion compilar"
+    exit 1
+  }
+  if($salida -eq $null) {
+    Write-Host "Para publicar es necesario indicar una carpeta de salida"
+    exit 1
+  }
+
+}
+
 
 #-----------------------------------------
 
