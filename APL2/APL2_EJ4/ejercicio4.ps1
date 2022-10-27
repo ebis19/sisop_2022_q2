@@ -13,7 +13,7 @@
   -ext          Se envian las extensiones de los archivos a analizar 
 
  .EXAMPLE
- 
+
  .\ejercicio4.ps1 -ruta ./pruebas -ext js,css,php,java
  .\ejercicio4.ps1 -ruta ./pruebas -ext js,java
  .\ejercicio4.ps1 -ruta ./pruebas -ext css
@@ -175,18 +175,20 @@ foreach ($filename in $(Get-ChildItem -Path ./"$ruta" | % { $_.Name })) {
                         $tipoComentario = $COMENTARIO_CERRADO
                         #suma codigo
                         $codigo++
-                        $codigoTotal++
+                      #  $codigoTotal++
                         Write-Host $linea
                     }
                 }
             }
         
 
-            [int]$porcentajeCodigo = $(($codigo * 100 / $cantidadLineas))
+            #[int]$porcentajeCodigo = $(($codigo * 100 / $cantidadLineas))
 
             $comentariosTotales += $comentarios
             $codigoTotal += $codigo
             $cantidadLineasTotales += $cantidadLineas
+
+            $codigo=$comentarios=$cantidadLineas=0;
         }
     }
 }
