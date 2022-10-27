@@ -11,7 +11,7 @@
     .PARAMETER -logs
         Directorio de entrada de archivos de texto.
     .EXAMPLE
-        Ejercicio2.ps1 -logs DIRECTORIO
+        ./Ejercicio2.ps1 -logs DIRECTORIO
 
     .NOTES
         Al final del proceso se visualizan los registros erroneos
@@ -34,11 +34,9 @@ Param(
 $directorio = $logs
 $tempArch6 = New-Item "tempArch6" -itemType Directory
 $tempArch7 = New-Item "tempArch7" -itemType Directory
-#$pattern = ‘SRV[A-Z]{2,4}\d{2}’
 
-
-#$pattern = re.compile(r'\b\d{4}[-/]\d{2}[-/]\d{2}\s\d{2}:\d{2}:\d{2}\s[-+]\d{4}\b')
 Get-ChildItem $directorio -File | ForEach-Object {
+  $archivo = $_.Name
   # validamos los registros leidos
   Get-Content $_ | ForEach-Object {
     $ErrorActionPreference = "SilentlyContinue"
@@ -47,64 +45,48 @@ Get-ChildItem $directorio -File | ForEach-Object {
     $hora = $horaUsuario.Split("-")[0]
     $fechaValida = $null
     $horaValida = $null
-    #Write-Host "fecha: " $fecha
-    #Write-Host "horaUsuario: " $horaUsuario
-    #$fecha = ($_ | Select-String -Pattern '\w+-\w+-\w+' | ForEach-Object { $_.Matches.value })
-    #$horaUsuario = ($_ | Select-String -Pattern '\w+:\w+:\w+-\w+' | ForEach-Object { $_.Matches.value })
     
     $pattern = ‘\d{4}\-d{2}\-\d{2}’
     if (!($fecha -match $pattern)) {
       $fechaValida = ([datetime]::ParseExact($fecha, "yyyy-MM-dd", $null)).ToString('yyyy-MM-dd')
     }
-    
+  
     $pattern = '[0-9][0-9]'
-    #$pattern = '\d\d'
     $hh = $hora.Split(":")[0]
     $mm = $hora.Split(":")[1]
     $ss = $hora.Split(":")[2]
-    #Write-Host "hora: " $hora
-    #Write-Host "hh: " $hh " mm: " $mm " ss: " $ss
-    if ($hh -match $pattern) {
-      if ($mm -match $pattern) {
-        if ($ss -match $pattern) {
-          $hhN = $hh
-          #if ($hhN -lt "24" && $hhN -ge "0" ) {
-          #  Write-Host "hora valida numerica: " $hhN.GetType()
-          #}
+    $longitudHora = $hh.Length
+    $longitudMinutos = $mm.Length
+    $longitudSegundos = $ss.Length
+
+    if ($hh -match $pattern -and $longitudHora -eq 2 -and $hh -ge 0 -and $hh -le 23) {
+      if ($mm -match $pattern -and $longitudMinutos -eq 2 -and $mm -ge 0 -and $mm -le 59) {
+        if ($ss -match $pattern -and $longitudSegundos -eq 2 -and $ss -ge 0 -and $ss -le 59) {
           $horaValida = $hora
-          #Write-Host "hora valida: " $horaValida
         }
       }
     }
       
     $usuario = $horaUsuario.Split("-")[1]
     
-    #Write-Host "fecha valida: " $fechaValida
     if ( ($fechaValida) -ne $null ) {
-      #Write-Host "Sin errores en fecha: " $fechaValida " " $_
       if ($horaValida -ne $null) {
-        #Write-Host "Sin errores en hora: " $hora " " $_
         if ($usuario) {
-          #Write-Host "Sin errores en usuario: " $usuario " " $_
           $_ | Out-File -FilePath $tempArch6\"temp_"$archivo"_sinErrores".txt –Append
         }
         else {
-          #Write-Host "Usuario erronea: " $_
           $_ | Out-File -FilePath $tempArch7\"temp_"$archivo"_conErrores".txt –Append
         }
       }
       else {
-        #Write-Host "Hora erronea: " $_
         $_ | Out-File -FilePath $tempArch7\"temp_"$archivo"_conErrores".txt –Append
       }
     }
     else {
-      #Write-Host "Fecha erronea: " $_
       $_ | Out-File -FilePath $tempArch7\"temp_"$archivo"_conErrores".txt –Append
     }
   }
 }
-
 
 $tempArch1 = New-Item "tempArch1" -itemType Directory
 $tempArch2 = New-Item "tempArch2" -itemType Directory
@@ -113,7 +95,6 @@ $tempArch4 = New-Item "tempArch4" -itemType Directory
 $tempArch5 = New-Item "tempArch5" -itemType Directory
 
 # Proceso cada archivo. Se genera un archivo ordenado por usuario
-#Get-ChildItem $directorio -File | ForEach-Object {
 Get-ChildItem $tempArch6 -File | ForEach-Object {
   $archivo = $_.Name
 
@@ -209,7 +190,7 @@ Get-ChildItem $tempArch4 -File | ForEach-Object {
     $cantLlamada = $hash2[$key]
 
     $promedioUser = $totalLlamada / $cantLlamada
-    Write-Host "    Usuario: "  $key  " - promedio tiempo: "  $promedioUser  " - cantidad: "  $cantLlamada
+    Write-Host "    Usuario: "  $key  " - promedio tiempo: "  $promedioUser  "seg. - cantidad: "  $cantLlamada
 
   }
   $totalNoSupera = 0
@@ -221,7 +202,7 @@ Get-ChildItem $tempArch4 -File | ForEach-Object {
     }
   }
 
-  Write-Host "Promedio de tiempo de las llamadas realizadas por día: " $promedio
+  Write-Host "Promedio de tiempo de las llamadas realizadas por día: " $promedio "seg."
   Write-Host "cantidad llamadas que no superan la media de tiempo por día: " $totalNoSupera
   $totalNoSupera = 0
 }
@@ -262,7 +243,8 @@ Get-ChildItem $tempArch5 -File | ForEach-Object {
       $hash1.Set_Item($userAct, $contador )
     }
   }
-  Write-Host "El usuario que tiene más cantidad de llamadas por debajo de la media en la semana: (media semanal " $promedioSemanal")"
+  Write-Host " "
+  Write-Host "El usuario que tiene más cantidad de llamadas por debajo de la media en la semana: (media semanal " $promedioSemanal" seg.)"
   $hash1.GetEnumerator() | Sort-Object -Property Value -Descending | Select-Object -First 1
 }
 
