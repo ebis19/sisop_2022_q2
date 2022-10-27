@@ -1,177 +1,281 @@
-<#
-    .SYNOPSIS
-    El script monitorea  los archvos de un directorio 
-    
-    .DESCRIPTION
-
-    Parametros de entrada
-    -directorio: path del directorio que contiene los archivos a monitoriar
-    -accion listar de acciones cuendo se detecta un cambio en el directorio
-    -publish: directorio donde se realizan las publicaciones
-    -Get-Help
-    Acciones posibles:
-    -publicar: publica los archivos en el directorio de publicaciones
-    -compilar: compila los archivos en el directorio
-    -peso: muestra el peso de los archivos en el directorio de monitoriado
-    -listar: lista los archivos que cambiaron en el directorio de monitoriado
-
-    El orden de  los parametros es indistinto
-
-    .EXAMPLE
-    ./ejercicio3.ps1 -directorio dir -accion listar,compilar 
-
-    .EXAMPLE
-    ./ejercicio5.ps1 -materias pathArchivoMaterias.txt -notas pathArchivoNotas.txt
-#>
-
-#carga de parametros
 
 #-----------------------------------------------#
-# Nombre del Script: contadorcodigo.sh          #
+# Nombre del Script: ejercicio3.sh              #
 # APL 2                                         #
-# Ejercicio 4                                   #
+# Ejercicio 3                                   #
 # Integrantes:                                  #
 # Molina Lara                     DNI: 40187938 #
 # Lopez Julian                    DNI: 39712927 #
 # Gorbolino Tamara                DNI: 41668847 #
 # Biscaia Elias                   DNI: 40078823 #
 # Amelia Colque                   DNI: 34095247 #
-# Nro entrega: 1                                #
+# Reentrega: 1                                  #
 #-----------------------------------------------#
+
+<#
+    .SYNOPSIS
+    El script monitorea  los archvos de un directorio especificado en -c
+    
+    .DESCRIPTION
+    
+    Parametros de entrada
+    -codigo direccion del directorio que contiene los archivos a monitoriar
+    -acciones lista de accciones a realizar. Acciones permitas listar,compilar,publicar,peso
+    -salida direccion del directorio donde se guardan las publicaciones
+ 
+
+    .EXAMPLE
+    ./ejercicio3.ps1 -codigo ./dir -acciones listar,compilar
+    ./ejercicio3.ps1 -codigo ./dir -acciones compilar,publicar -salida ./publicado
+#>
 
 #CARGA DE PARAMETROS
 [cmdletbinding()]
 Param(
-    [Parameter(Mandatory=$true)]
-    [String[]]
-    [ValidateNotNullOrEmpty()]
-    $accion,
-    [Parameter(Mandatory = $true,
-        ValueFromPipeline = $true,
-        HelpMessage = "Path to the file or files to process.")]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $directorio,
-    [Parameter(Mandatory = $false,
-        ValueFromPipeline = $true,
-        HelpMessage = "Path to the file or files to process.")]
-    [Alias("PSPath")]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $publish
+  [Parameter(ParameterSetName = "ejecucion",Mandatory=$True)]
+  $codigo,
+  [Parameter(ParameterSetName = "ejecucion")]
+  $acciones,
+  [Parameter(ParameterSetName = "ejecucion")]
+  $salida
+)   
+ 
 
-)
 
-$acciones = @($accion -split ",")
 
-#VALIDACIONES
+#VALIDAR
 
-if ($null -eq $accion) {
-    Write-Error "Debe indicar una accion"
-    exit 1
+if($acciones -eq $null) {
+  Write-Host "Debe ingresar accioes"
+  exit 1
 }
 
-if ($null -eq $directorio) {
-    Write-Error "Debe indicar un directorio"
+$actions = @($acciones -split ",")
+
+$ACCION_PUBLICAR = $FALSE 
+$ACCION_COMPILAR = $FALSE
+
+foreach ($accion in $acciones) {
+  if($accion -eq "publicar") {
+    $ACCION_PUBLICAR = $TRUE
+  }
+  if($accion -eq "compilar") {
+    $ACCION_COMPILAR = $TRUE
+  }
+}
+
+if($ACCION_PUBLICAR -eq $TRUE){
+  if($ACCION_COMPILAR -eq $FALSE){
+    Write-Host "No se puede usar la accion publicar sin la accion compilar"
     exit 1
+  }
+  if($salida -eq $null) {
+    Write-Host "Para publicar es necesario indicar una carpeta de salida"
+    exit 1
+  }
+
 }
 
 
-
-if(!($acciones.Contains("compilar")) -and $acciones.Contains("publicar")){
-    Write-Error "No se puede publicar sin compilar"
-    exit 1
-}
+#-----------------------------------------
 
 
-$existe = Test-Path "$directorio"
-if ($existe -ne $true ) {
-    Write-Error "La dirección del directorio no existe"
-    exit 1
-}
+# define a function that gets called for every change:
+function invoke_action {
+  param
+  (
+    [Parameter(Mandatory)]
+    [System.IO.WaitForChangedResult]
+    $ChangeInformation,
+    [Parameter(Mandatory)]
+    [System.String]
+    $File,
+    [Parameter(Mandatory)]
+    [System.String]
+    $Path
+  )
+  
+  $compilado = $FALSE;
 
-if ($acciones.Contains("publish")  -and $null -eq $publish) {
-    Write-Error "Debe indicar un directorio de publicacion"
-    exit 1
-}
+  foreach ($accion in $acciones) {
+    if ($accion -eq "compilar" && $compilado -eq $FALSE) {
+      $compilado = $TRUE
 
-$directorio = Resolve-Path $directorio
-#--------------------------------------------------------------------------
+      $rutaScript = Get-Location
+      $rutaBin = "$rutaScript\bin"
+      $rutaCompilado = "$rutaScript\bin\compilado.o" 
 
-#FUNCIONES
-
-Function Register-Watcher {
-    param ($folder,$publish)
-    $filter = "*.*" #all files
-    $watcher = New-Object IO.FileSystemWatcher $folder, $filter -Property @{ 
-        IncludeSubdirectories = $true
-        EnableRaisingEvents   = $true
+      if (-not (Test-Path $rutaBin)) {
+        New-Item $rutaBin -itemType Directory
+      } elseif(Test-Path $rutaCompilado) {
+        Remove-Item $rutaCompilado 
+      }
+            
+      foreach ( $item in Get-ChildItem $Path ) {
+        Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+      }
     }
-    $listarString = '
-    $name = $Event.SourceEventArgs.FullPath
-     Write-Host "The file $name"'
-    $listarString+= "`n"
+    if ($accion -eq "publicar") {
+      #SI EL DIRECTORIO NO EXISTE LO CREA
 
-    $pesoString = '
-    $name = $Event.SourceEventArgs.FullPath
-    $size = (Get-Item $name).Length
-    Write-Host "The file $name has $size bytes"'
-    $listarString+= "`n"
-    $accionExecute= ''
-    $compilarString =
-    '$files = Get-ChildItem '+ $folder +' -Filter *
-    $content=""
-    foreach($file in $files){ 
-        $content += Get-Content $file}
-    $content | Out-File bin/compilado.o'
-    $compilarString+= "`n"
-    $compilarString+= "`n"
+      if($compilado -eq $FALSE){
 
-    $publicarString =
-    '$filesPublicar = Get-ChildItem "bin" -Filter *
-    foreach($file in  $filesPublicar){
-            Copy-Item $file.FullName ' + $publish +
-    '}'
-    $publicarString+= "`n"
+        #COMPILA
+        $compilado = $TRUE
 
-    foreach ($accion in $acciones)  {
-        if ($accion -eq "compilar") {
-            $CompilarBoolean  = $true
+        $rutaScript = Get-Location
+        $rutaBin = "$rutaScript\bin"
+        $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+        if (-not (Test-Path $rutaBin)) {
+          New-Item $rutaBin -itemType Directory
+        } elseif(Test-Path $rutaCompilado) {
+          Remove-Item $rutaCompilado 
         }
-        if ($accion -eq "publicar") {
-            $PublicarBoolean  = $true
+            
+        foreach ( $item in Get-ChildItem $Path ) {
+          Get-Content $item.FullName | Add-Content -Path $rutaCompilado
         }
-        if($accion -eq "listar"){
-            $ListarBoolean = $true
-        }
-        if($accion -eq "peso"){
-            $pesoBoolean = $true
-        }
-    }
+      }
+      
+      if (-not (Test-Path $salida)){
+        New-Item $salida -Type Directory
+      }
 
-    if($CompilarBoolean){
-        $accionExecute += " " + $compilarString
-        $comp=[Scriptblock]::Create($compilarString)
-        &$comp
+      #PREGUNTA SI EL ARCHIVO BIN GENERADO POR COMPILAR EXISTE
+      $rutaOrigen =  Resolve-Path "bin/compilado.o"
+      if([System.IO.File]::Exists($rutaOrigen)){
+        Copy-Item -Path $rutaOrigen -Destination $salida ##-Recurse -Force -Passthru
+      }
+      
     }
-    if($PublicarBoolean){
-        $accionExecute += " " + $publicarString
-        $publ=[Scriptblock]::Create($publicarString)
-        &$publ
+    if ($accion -eq "listar") {
+      $ChangeInformation | Out-String | Write-Host -ForegroundColor DarkYellow
     }
-    if($ListarBoolean){
-        $accionExecute += " " + $listarString
+    if ($accion -eq "peso") {
+      if ([System.IO.File]::Exists($File)) {
+        $size = (Get-Item $File).Length / 1Kb
+        Write-Host "Archivo:" $File "Peso:" $size"Kb" -ForegroundColor DarkYellow
+      }
     }
-    if($pesoBoolean){
-        $accionExecute += $pesoString
-    }
-    Write-Host $accionExecute
-    $accionExecute = [Scriptblock]::Create($accionExecute)
-    Register-ObjectEvent $Watcher -EventName "Changed" -Action $accionExecute 
-    Register-ObjectEvent $Watcher -EventName "Created" -Action $accionExecute
-    Register-ObjectEvent $Watcher -EventName "Deleted" -Action $accionExecute
-    Register-ObjectEvent $Watcher -EventName "Renamed" -Action $accionExecute   
+  }
+
 }
 
-Register-Watcher -folder $directorio -publish $publish
-exit 0
+# use a try...finally construct to release the
+# filesystemwatcher once the loop is aborted
+# by pressing CTRL+C
+
+function waching {
+
+  $codigo = Resolve-Path $codigo
+
+  # specify the path to the folder you want to monitor:
+  $Path = $codigo
+
+  # specify which files you want to monitor
+  $FileFilter = '*'  
+
+  # specify whether you want to monitor subfolders as well:
+  $IncludeSubfolders = $true
+
+  # specify the file or folder properties you want to monitor:
+  $AttributeFilter = [IO.NotifyFilters]::FileName, [IO.NotifyFilters]::LastWrite 
+
+  # specify the type of changes you want to monitor:
+  $ChangeTypes = [System.IO.WatcherChangeTypes]::Created, [System.IO.WatcherChangeTypes]::Deleted, [System.IO.WatcherChangeTypes]::Changed, [System.IO.WatcherChangeTypes]::Renamed
+
+  # specify the maximum time (in milliseconds) you want to wait for changes:
+  $Timeout = 1000
+
+    # create a filesystemwatcher object
+    $watcher = New-Object -TypeName IO.FileSystemWatcher -ArgumentList $Path, $FileFilter -Property @{
+      IncludeSubdirectories = $IncludeSubfolders
+      NotifyFilter          = $AttributeFilter
+    }
+
+    # start monitoring manually in a loop:
+    do {
+      # wait for changes for the specified timeout
+      # IMPORTANT: while the watcher is active, PowerShell cannot be stopped
+      # so it is recommended to use a timeout of 1000ms and repeat the
+      # monitoring in a loop. This way, you have the chance to abort the
+      # script every second.
+      $result = $watcher.WaitForChanged($ChangeTypes, $Timeout)
+      # if there was a timeout, continue monitoring:
+      if ($result.TimedOut) { continue }
+      $file = "$Path" + "/" + $result.Name
+
+      invoke_action -Change $result -File $file -Path $Path
+            
+      # $action.SourceEventArgs | Out-String
+      # $watcher | Get-Member -MemberType Property |Out-String #-MemberType Details 
+      # the loop runs forever until you hit CTRL+C    
+    } while ($true)
+  
+}
+
+
+$codigo = Resolve-Path $codigo
+
+# specify the path to the folder you want to monitor:
+$Path = $codigo
+
+$compilado = $FALSE
+
+
+foreach ($accion in $acciones) {
+  if ($accion -eq "compilar" && $compilado -eq $FALSE) {
+    $compilado = $TRUE
+
+    $rutaScript = Get-Location
+    $rutaBin = "$rutaScript\bin"
+    $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+    if (-not (Test-Path $rutaBin)) {
+      New-Item $rutaBin -itemType Directory
+    } elseif(Test-Path $rutaCompilado) {
+      Remove-Item $rutaCompilado 
+    }
+          
+    foreach ( $item in Get-ChildItem $Path ) {
+      Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+    }
+  }
+  if ($accion -eq "publicar") {
+    #SI EL DIRECTORIO NO EXISTE LO CREA
+
+    if($compilado -eq $FALSE){
+
+      #COMPILA
+      $compilado = $TRUE
+
+      $rutaScript = Get-Location
+      $rutaBin = "$rutaScript\bin"
+      $rutaCompilado = "$rutaScript\bin\compilado.o" 
+
+      if (-not (Test-Path $rutaBin)) {
+        New-Item $rutaBin -itemType Directory
+      } elseif(Test-Path $rutaCompilado) {
+        Remove-Item $rutaCompilado 
+      }
+          
+      foreach ( $item in Get-ChildItem $Path ) {
+        Get-Content $item.FullName | Add-Content -Path $rutaCompilado
+      }
+    }
+    
+    if (-not (Test-Path $salida)){
+      New-Item $salida -Type Directory
+    }
+
+    #PREGUNTA SI EL ARCHIVO BIN GENERADO POR COMPILAR EXISTE
+    $rutaOrigen =  Resolve-Path "bin/compilado.o"
+    if([System.IO.File]::Exists($rutaOrigen)){
+      Copy-Item -Path $rutaOrigen -Destination $salida ##-Recurse -Force -Passthru
+    }
+    
+  }
+}
+
+waching
