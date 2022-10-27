@@ -101,7 +101,7 @@ foreach ($linea in $archivo) {
                     $abandonan[$datosAlumno[$ID_MATERIA]]++
 
                 }
-				elseif ( [int16]$datosAlumno[$PARCIAL_1] -lt 4 -and [int16]$datosAlumno[$PARCIAL_2] -lt 4 ){ #menor que 
+				elseif ( [int16]$datosAlumno[$PARCIAL_1] -lt 4 -or [int16]$datosAlumno[$PARCIAL_2] -lt 4 ){ #menor que 
                     $recursan[$datosAlumno[$ID_MATERIA]]++
                 } 
 				else{
