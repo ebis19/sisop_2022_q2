@@ -123,7 +123,7 @@ recuperar(){
             nombre=$(basename "$rutaArchivoUnico")
             nombreArchivo=${nombre% (*}
             archivoFinal="${rutaArchivo}/${nombreArchivo}"
-            tar -Pxvf "$papelera" "$rutaArchivoUnico" -O > "$archivoFinal" 1> /dev/null
+            tar -Pxvf "$papelera" "$rutaArchivoUnico" -O > "$archivoFinal" 2> /dev/null
             tar -Pvf "$papelera" --delete "$rutaArchivoUnico" 1> /dev/null
         else
 		#Mas de un archivo con el mismo nombre
@@ -175,7 +175,7 @@ recuperar(){
                     nombre=$(basename "$archivo")
                     nombreArchivo=${nombre% (*}
                     archivoFinal="${rutaArchivo}/${nombreArchivo}"
-                    tar -Pxvf "$papelera" "$archivo" -O > "$archivoFinal" 1> /dev/null
+                    tar -Pxvf "$papelera" "$archivo" -O > "$archivoFinal" 2> /dev/null
                     tar -Pvf "$papelera" --delete "$archivo" 1> /dev/null
                 fi
             done 
