@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #-----------------------------------------------#
 # Nombre del Script: contadorcodigo.sh          #
 # APL 1                                         #
@@ -24,15 +23,17 @@ EXT_INCORRECTA=0
 
 tipoComentario=$COMENTARIO_CERRADO
 
-cantLineas=0
-comentario=0
+#cantLineas=0
+#comentario=0
 cantFicheros=0
-codigoaEntreComentario=0
-codigoaEntreComentarioTotal=0
+#codigoaEntreComentario=0
+#codigoaEntreComentarioTotal=0
 
-cantLineasTotales=0
-comentariosTotales=0
-
+#cantLineasTotales=0
+#comentariosTotales=0
+comentarios=0
+codigo=0
+lineas=0
 #----------------------------
 
 #Validacion de parametros
@@ -117,19 +118,22 @@ validarExtension() {
 
 
 conteo() {
-        (( cantLineas++ ))
-	(( cantLineasTotales++ ))
+	(( lineas++ ))
+        #(( cantLineas++ ))
+	#(( cantLineasTotales++ ))
         #COMENTARIOS CERRADOS   EJ. */ o ninguno
         if [[ $tipoComentario == $COMENTARIO_CERRADO ]]
         then
                 if [[ $comienzoDeLinea == $COMENTARIO_SIMPLE ]]
                 then
-                                (( comentario++ ))
-				(( comentariosTotales++ ))
+			(( comentarios++ ))
+                     #           (( comentario++ ))
+		#		(( comentariosTotales++ ))
 		elif [[ $comienzoDeLinea == $COMENTARIO_MULTIPLE ]]
                 then
-                        (( comentario++ ))
-			(( comentariosTotales++ ))
+			(( comentarios++ ))
+                       # (( comentario++ ))
+			#(( comentariosTotales++ ))
                         if [[ $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]] #valido si el comentario multiple cierra en la misma linea
                         then
                                 tipoComentario=$COMENTARIO_CERRADO
@@ -140,35 +144,38 @@ conteo() {
 		#COMENTARIO DE TIPO ...//....
 		elif [[ "$linea" == *"$COMENTARIO_SIMPLE"* ]]
 		then
-			(( comentario++ ))
-			(( comentariosTotales++ ))
-			(( codigoaEntreComentario++ ))
-			(( codigoaEntreComentarioTotal++ ))
-
+			#(( comentario++ ))
+			#(( comentariosTotales++ ))
+			#(( codigoaEntreComentario++ ))
+			#(( codigoaEntreComentarioTotal++ ))
+			(( comentarios++ ))
+			(( codigo++ ))
 		#COMENTARIO DE TIPO ..../*....*/
 		elif [[ "$linea" == *"$COMENTARIO_MULTIPLE"* ]]
 		then
-			(( comentario++ ))
-                        (( comentariosTotales++ ))
-                        (( codigoaEntreComentario++ ))
-                        (( codigoaEntreComentarioTotal++ ))
+			(( comentarios++ ))
+			(( codigos++ ))
+                        #(( comentariosTotales++ ))
+                        #(( codigoaEntreComentario++ ))
+                        #(( codigoaEntreComentarioTotal++ ))
 
 			#COMENTARRIO QUE NO CIERRA EN LA MISMA LINEA EJ. ...../*.......
 			if [[ "$linea" != *"$FIN_COMENTARIO_MULTIPLE"* ]]
 			then
 				tipoComentario=$COMENTARIO_ABIERTO
 			fi
-		elif [[ -z "$linea" ]]
+		elif [[ ! -z "$linea" ]]
 		then
-                	(( cantLineas-- ))
-                	(( cantLineasTotales-- ))
+			(( codigo++ ))
+                	#(( cantLineas-- ))
+                	#(( cantLineasTotales-- ))
 		fi
         #COMENTARIOS ABIERTOS   Ej. /*
         elif [[ $tipoComentario == $COMENTARIO_ABIERTO ]]
 	then
-         	(( comentario++ ))
-		(( comentariosTotales++ ))
-
+         	#(( comentario++ ))
+		#(( comentariosTotales++ ))
+		(( comentarios++ ))
                 if [[ $comienzoDeLinea == $FIN_COMENTARIO_MULTIPLE || $finDeLinea == $FIN_COMENTARIO_MULTIPLE ]]
                 then
                         tipoComentario=$COMENTARIO_CERRADO
@@ -176,22 +183,12 @@ conteo() {
 		elif [[ "$linea" == *"$FIN_COMENTARIO_MULTIPLE"* ]]
 		then
 			tipoComentario=$COMENTARIO_CERRADO
-			(( codigoaEntreComentario++ ))
-                        (( codigoaEntreComentarioTotal++ ))
+			(( codigo++ ))
+			#(( codigoaEntreComentario++ ))
+                        #(( codigoaEntreComentarioTotal++ ))
                 fi
 	fi
 
-}
-
-responsePorFichero() {
-codigo=$((cantLineas - comentario + codigoaEntreComentario))
-porcentajeCodigo=$((codigo*100/cantLineas))
-porcentajeComentario=$((100-porcentajeCodigo))
-echo "------------------------------------------------"
-echo "Archivo: " "$fichero"
-echo "Cantidad de lineas de codigo: " $codigo " con un porcentaje de: " $porcentajeCodigo"%"
-echo "Cantidad de lineas de comentarios:  " $comentario "con un porcentaje de: " $porcentajeComentario"%"
-echo "------------------------------------------------"
 }
 
 leerFichero (){
@@ -240,12 +237,12 @@ then
 	exit 1
 fi
 
-codigoTotal=$((cantLineasTotales - comentariosTotales + codigoaEntreComentarioTotal))
-porcentajeCodigoTotal=$((codigoTotal*100/cantLineasTotales))
-porcentajeComentarioTotal=$((100-porcentajeCodigoTotal))
+    #$((cantLineasTotales - comentariosTotales + codigoaEntreComentarioTotal))
+porcentajeCodigoTotal=$((codigo*100/lineas))
+porcentajeComentarioTotal=$((comentarios*100/lineas))
 echo "------------------------------------------------"
 echo "Cantidad de archivos analizados: " $cantidadFicheros
-echo "Cantidad de lineas de codigo: " $codigoTotal " con un porcentaje de: " $porcentajeCodigoTotal"%"
-echo "Cantidad de comentarios" $comentariosTotales " con un porcentaje de: " $porcentajeComentarioTotal"%"
+echo "Cantidad de lineas de codigo: " $codigo " con un porcentaje de: " $porcentajeCodigoTotal"%"
+echo "Cantidad de comentarios" $comentarios " con un porcentaje de: " $porcentajeComentarioTotal"%"
 exit 1
 
