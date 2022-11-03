@@ -239,9 +239,9 @@ fi
 
     #$((cantLineasTotales - comentariosTotales + codigoaEntreComentarioTotal))
 
-porcentajeCodigoTotal=$(printf "%.0f" $(echo "scale=2;$codigo*100/$lineas" | bc)); echo $res
+porcentajeCodigoTotal=$(printf "%.0f" $(echo "scale=2;$codigo*100/$lineas" | bc))
 #porcentajeCodigoTotal=$((codigo*100/lineas))
-porcentajeComentarioTotal=$((comentarios*100/lineas))
+porcentajeComentarioTotal=$(printf "%.0f" $(echo "scale=2;$comentarios*100/$lineas" | bc))
 echo "------------------------------------------------"
 echo "Cantidad de archivos analizados: " $cantidadFicheros
 echo "Cantidad de lineas de codigo: " $codigo " con un porcentaje de: " $porcentajeCodigoTotal"%"
